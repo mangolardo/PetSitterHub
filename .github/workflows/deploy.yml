@@ -1,0 +1,98 @@
+name: Deploy PetSitterHub su Google Cloud Run
+
+# La pipeline si avvia in due modi:
+# 1. In automatico ad ogni "push" sul branch principale (main)
+# 2. Manualmente tramite il pulsante "Run workflow" di GitHub (workflow_dispatch)
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Variabili d'ambiente da personalizzare con i dati del tuo progetto GCP
+env:
+  PROJECT_ID: 'project-d0dedbe4-a22d-46ef-8cf'
+  REGION: 'europe-west6' # Inserisci la region che preferisci
+  GAR_LOCATION: 'europe-west6-docker.pkg.dev/project-d0dedbe4-a22d-46ef-8cf/petsitter-repo'
+
+jobs:
+  # JOB 1: Test, Build e Deploy del BACKEND
+  deploy-backend:
+    name: Build e Deploy Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del codice sorgente
+        uses: actions/checkout@v4
+
+      # Esecuzione dei test automatici richiesti per la valutazione
+      - name: Setup Node.js per i Test
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Esecuzione Test Unitari e di Integrazione
+        run: |
+          cd backend
+          npm install
+          npm test # Se questo test fallisce, il deploy si blocca in automatico
+
+      # Autenticazione sicura verso Google Cloud tramite i Secrets di GitHub
+      - name: Autenticazione GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configurazione Docker per Artifact Registry
+        run: gcloud auth configure-docker europe-west1-docker.pkg.dev
+
+      # Utilizzo del Dockerfile del Backend
+      - name: Build e Push Immagine Docker (Backend)
+        run: |
+          docker build -t ${{ env.GAR_LOCATION }}/backend:${{ github.sha }} ./backend
+          docker push ${{ env.GAR_LOCATION }}/backend:${{ github.sha }}
+
+      # Deploy su Cloud Run con scaling automatico
+      - name: Rilascio su Cloud Run (Backend)
+        run: |
+          gcloud run deploy petsitter-backend \
+            --image ${{ env.GAR_LOCATION }}/backend:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --allow-unauthenticated \
+            --port 3000
+
+  # JOB 2: Build e Deploy del FRONTEND (inizia dopo il backend)
+  deploy-frontend:
+    name: Build e Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: deploy-backend # Assicura che l'API sia online prima del sito web
+    steps:
+      - name: Checkout del codice sorgente
+        uses: actions/checkout@v4
+
+      - name: Autenticazione GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configurazione Docker per Artifact Registry
+        run: gcloud auth configure-docker europe-west1-docker.pkg.dev
+
+      # Utilizzo del Dockerfile del Frontend
+      - name: Build e Push Immagine Docker (Frontend)
+        run: |
+          docker build -t ${{ env.GAR_LOCATION }}/frontend:${{ github.sha }} ./frontend
+          docker push ${{ env.GAR_LOCATION }}/frontend:${{ github.sha }}
+
+      # Deploy su Cloud Run
+      - name: Rilascio su Cloud Run (Frontend)
+        run: |
+          gcloud run deploy petsitter-frontend \
+            --image ${{ env.GAR_LOCATION }}/frontend:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --allow-unauthenticated \
+            --port 80
