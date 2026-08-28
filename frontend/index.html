@@ -1,10 +1,868 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
+
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="PetSitterHub - Trova il pet-sitter giusto per il tuo animale.">
+
+    <title>PetSitterHub — Trova il sitter giusto</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+            rel="stylesheet">
+
+    <!-- Google Font -->
+    <link
+            href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet">
+
+    <!-- CSS personalizzato -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
+
+<!-- =========================
+     HEADER
+========================= -->
+
+<header class="site-header sticky-top">
+
+    <nav class="navbar navbar-expand-md">
+
+        <div class="container">
+
+            <a class="navbar-brand d-flex align-items-center gap-2"
+               href="#inizio">
+
+                <span class="brand-icon">
+                    <i class="bi bi-patch-check-fill"></i>
+                </span>
+
+                <span>PetSitterHub</span>
+
+            </a>
+
+
+            <!-- Pulsante menu mobile -->
+
+            <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#mainNavbar"
+                    aria-controls="mainNavbar"
+                    aria-expanded="false"
+                    aria-label="Apri menu">
+
+                <span class="navbar-toggler-icon"></span>
+
+            </button>
+
+
+            <!-- Menu -->
+
+            <div class="collapse navbar-collapse"
+                 id="mainNavbar">
+
+                <ul class="navbar-nav ms-auto align-items-md-center gap-md-3">
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="#come-funziona">
+                            Come funziona
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="#professionisti">
+                            Professionisti
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="#servizi">
+                            Servizi
+                        </a>
+                    </li>
+
+                    <li class="nav-item ms-md-2">
+
+                        <button
+                                id="login-button"
+                                class="btn btn-outline-green rounded-pill px-4">
+
+                            Accedi
+
+                        </button>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+</header>
+
+
+<main>
+
+    <!-- HERO -->
+
+    <section id="inizio"
+             class="hero-section">
+
+        <div class="container">
+
+            <div class="row align-items-center g-5">
+
+                <!-- Testo -->
+
+                <div class="col-lg-6">
+
+                    <div class="reveal">
+
+                        <div class="hero-eyebrow">
+
+                            <i class="bi bi-shield-check"></i>
+
+                            Professionisti verificati
+
+                        </div>
+
+
+                        <h1 class="hero-title">
+
+                            Il pet-sitter
+                            <span>giusto</span>
+                            per il tuo amico.
+
+                        </h1>
+
+
+                        <p class="hero-description">
+
+                            Trova persone affidabili e appassionate
+                            che si prendano cura del tuo animale
+                            quando ne hai bisogno.
+
+                        </p>
+
+
+                        <!-- FORM RICERCA -->
+
+                        <form id="search-form"
+                              class="search-box">
+
+                            <div class="row g-2">
+
+                                <!-- Località -->
+
+                                <div class="col-md-5">
+
+                                    <label
+                                            for="location-input"
+                                            class="visually-hidden">
+
+                                        Località
+
+                                    </label>
+
+                                    <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="bi bi-geo-alt"></i>
+                                    </span>
+
+                                        <input
+                                                type="text"
+                                                id="location-input"
+                                                class="form-control"
+                                                placeholder="Es. Milano">
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Servizio -->
+
+                                <div class="col-md-4">
+
+                                    <label
+                                            for="service-select"
+                                            class="visually-hidden">
+
+                                        Servizio
+
+                                    </label>
+
+                                    <select
+                                            id="service-select"
+                                            class="form-select">
+
+                                        <option value="">
+                                            Tutti i servizi
+                                        </option>
+
+                                        <option value="passeggiate">
+                                            Passeggiate
+                                        </option>
+
+                                        <option value="pet-sitting">
+                                            Pet-sitting
+                                        </option>
+
+                                        <option value="pensione">
+                                            Pensione
+                                        </option>
+
+                                        <option value="toelettatura">
+                                            Toelettatura
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- Bottone -->
+
+                                <div class="col-md-3">
+
+                                    <button
+                                            type="submit"
+                                            class="btn btn-coral w-100 h-100">
+
+                                        <i class="bi bi-search"></i>
+
+                                        Cerca
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </form>
+
+
+                        <p id="search-status"
+                           class="search-status"
+                           aria-live="polite">
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Immagine -->
+
+                <div class="col-lg-6">
+
+                    <div class="hero-image-wrapper">
+
+                        <div class="decorative-circle circle-one"></div>
+
+                        <div class="decorative-circle circle-two"></div>
+
+                        <div class="hero-image">
+
+                            <img
+                                    src="https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=80"
+                                    alt="Cane felice">
+
+                            <div class="image-caption">
+
+                                <i class="bi bi-heart-fill"></i>
+
+                                Cura con amore
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FILTRI -->
+
+    <section id="servizi"
+             class="services-section">
+
+        <div class="container">
+
+            <div class="row align-items-center g-4">
+
+                <div class="col-lg-5">
+
+                    <h2>
+                        Di cosa hai bisogno?
+                    </h2>
+
+                    <p>
+                        Scegli il servizio più adatto al tuo animale.
+                    </p>
+
+                </div>
+
+
+                <div class="col-lg-7">
+
+                    <div
+                            class="d-flex flex-wrap gap-2 justify-content-lg-end"
+                            role="group">
+
+                        <button
+                                class="filter-btn active"
+                                data-service="">
+
+                            Tutti
+
+                        </button>
+
+                        <button
+                                class="filter-btn"
+                                data-service="passeggiate">
+
+                            Passeggiate
+
+                        </button>
+
+                        <button
+                                class="filter-btn"
+                                data-service="pet-sitting">
+
+                            Pet-sitting
+
+                        </button>
+
+                        <button
+                                class="filter-btn"
+                                data-service="pensione">
+
+                            Pensione
+
+                        </button>
+
+                        <button
+                                class="filter-btn"
+                                data-service="toelettatura">
+
+                            Toelettatura
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- PROFESSIONISTI -->
+
+    <section id="professionisti"
+             class="sitters-section">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="section-eyebrow">
+                        I nostri professionisti
+                    </p>
+
+                    <h2>
+                        Trova il tuo pet-sitter
+                    </h2>
+
+                </div>
+
+                <p>
+                    Persone affidabili, selezionate
+                    per prendersi cura dei tuoi animali.
+                </p>
+
+            </div>
+
+
+            <div id="sitter-grid"
+                 class="row g-4">
+
+
+                <!-- SITTER 1 -->
+
+                <div class="col-md-6 col-xl-4 sitter-wrapper">
+
+                    <article
+                            class="sitter-card"
+                            data-zone="milano"
+                            data-services="passeggiate,pet-sitting">
+
+                        <div class="sitter-top">
+
+                        <span class="verified-badge">
+
+                            <i class="bi bi-shield-check"></i>
+
+                            Verificato
+
+                        </span>
+
+                            <i class="bi bi-heart-fill sitter-icon"></i>
+
+                        </div>
+
+
+                        <div class="sitter-body">
+
+                            <div class="d-flex justify-content-between">
+
+                                <div>
+
+                                    <h3>
+                                        Giulia Rossi
+                                    </h3>
+
+                                    <p class="zone">
+                                        <i class="bi bi-geo-alt"></i>
+                                        Milano
+                                    </p>
+
+                                </div>
+
+                                <span class="rating">
+
+                                <i class="bi bi-star-fill"></i>
+                                4.9
+
+                            </span>
+
+                            </div>
+
+
+                            <p class="services">
+                                Passeggiate e pet-sitting
+                                per cani e gatti.
+                            </p>
+
+
+                            <div class="sitter-footer">
+
+                                <strong>
+                                    €15 / ora
+                                </strong>
+
+                                <button
+                                        class="availability-toggle btn btn-sm"
+                                        type="button"
+                                        aria-expanded="false">
+
+                                    Disponibilità
+
+                                </button>
+
+                            </div>
+
+
+                            <div class="availability-panel">
+
+                                <p>
+                                    <i class="bi bi-calendar-check"></i>
+                                    Disponibile dal lunedì al venerdì.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <!-- SITTER 2 -->
+
+                <div class="col-md-6 col-xl-4 sitter-wrapper">
+
+                    <article
+                            class="sitter-card"
+                            data-zone="bologna"
+                            data-services="pensione,pet-sitting">
+
+                        <div class="sitter-top">
+
+                        <span class="verified-badge">
+
+                            <i class="bi bi-shield-check"></i>
+
+                            Verificato
+
+                        </span>
+
+                            <i class="bi bi-house-heart sitter-icon"></i>
+
+                        </div>
+
+
+                        <div class="sitter-body">
+
+                            <div class="d-flex justify-content-between">
+
+                                <div>
+
+                                    <h3>
+                                        Marco Bianchi
+                                    </h3>
+
+                                    <p class="zone">
+                                        <i class="bi bi-geo-alt"></i>
+                                        Bologna
+                                    </p>
+
+                                </div>
+
+                                <span class="rating">
+
+                                <i class="bi bi-star-fill"></i>
+                                4.8
+
+                            </span>
+
+                            </div>
+
+
+                            <p class="services">
+                                Pensione e pet-sitting
+                                direttamente a casa mia.
+                            </p>
+
+
+                            <div class="sitter-footer">
+
+                                <strong>
+                                    €20 / giorno
+                                </strong>
+
+                                <button
+                                        class="availability-toggle btn btn-sm"
+                                        type="button"
+                                        aria-expanded="false">
+
+                                    Disponibilità
+
+                                </button>
+
+                            </div>
+
+
+                            <div class="availability-panel">
+
+                                <p>
+                                    <i class="bi bi-calendar-check"></i>
+                                    Disponibile nei weekend.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <!-- SITTER 3 -->
+
+                <div class="col-md-6 col-xl-4 sitter-wrapper">
+
+                    <article
+                            class="sitter-card"
+                            data-zone="torino"
+                            data-services="passeggiate,toelettatura">
+
+                        <div class="sitter-top">
+
+                        <span class="verified-badge">
+
+                            <i class="bi bi-shield-check"></i>
+
+                            Verificato
+
+                        </span>
+
+                            <i class="bi bi-scissors sitter-icon"></i>
+
+                        </div>
+
+
+                        <div class="sitter-body">
+
+                            <div class="d-flex justify-content-between">
+
+                                <div>
+
+                                    <h3>
+                                        Elena Verdi
+                                    </h3>
+
+                                    <p class="zone">
+                                        <i class="bi bi-geo-alt"></i>
+                                        Torino
+                                    </p>
+
+                                </div>
+
+                                <span class="rating">
+
+                                <i class="bi bi-star-fill"></i>
+                                5.0
+
+                            </span>
+
+                            </div>
+
+
+                            <p class="services">
+                                Passeggiate e servizi
+                                di toelettatura.
+                            </p>
+
+
+                            <div class="sitter-footer">
+
+                                <strong>
+                                    €18 / ora
+                                </strong>
+
+                                <button
+                                        class="availability-toggle btn btn-sm"
+                                        type="button"
+                                        aria-expanded="false">
+
+                                    Disponibilità
+
+                                </button>
+
+                            </div>
+
+
+                            <div class="availability-panel">
+
+                                <p>
+                                    <i class="bi bi-calendar-check"></i>
+                                    Disponibile tutti i giorni.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+
+            <!-- Nessun risultato -->
+
+            <div
+                    id="empty-results"
+                    class="empty-results d-none">
+
+                <i class="bi bi-search"></i>
+
+                <p>
+                    Nessun professionista corrisponde
+                    alla ricerca.
+                </p>
+
+                <small>
+                    Prova a modificare zona o servizio.
+                </small>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- COME FUNZIONA -->
+
+    <section id="come-funziona"
+             class="how-section">
+
+        <div class="container">
+
+            <p class="section-eyebrow">
+                Semplice e veloce
+            </p>
+
+            <h2>
+                Come funziona?
+            </h2>
+
+
+            <div class="row g-4 mt-3">
+
+
+                <div class="col-md-4">
+
+                    <div class="step-card">
+
+                    <span class="step-number">
+                        1
+                    </span>
+
+                        <h3>
+                            Cerca
+                        </h3>
+
+                        <p>
+                            Inserisci la tua zona e scegli
+                            il servizio di cui hai bisogno.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="step-card">
+
+                    <span class="step-number">
+                        2
+                    </span>
+
+                        <h3>
+                            Scegli
+                        </h3>
+
+                        <p>
+                            Confronta i professionisti,
+                            le recensioni e i servizi offerti.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="step-card">
+
+                    <span class="step-number">
+                        3
+                    </span>
+
+                        <h3>
+                            Prenota
+                        </h3>
+
+                        <p>
+                            Contatta il pet-sitter e organizza
+                            la cura del tuo animale.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- FOOTER -->
+
+<footer class="site-footer">
+
+    <div class="container">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+
+                <p class="mb-md-0">
+                    © 2026 PetSitterHub.
+                    Tutti i diritti riservati.
+                </p>
+
+            </div>
+
+            <div class="col-md-6 text-md-end">
+
+                <p class="mb-0">
+                    Cura, fiducia e amore per i nostri animali.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<!-- jQuery -->
+<script
+        src="https://code.jquery.com/jquery-3.7.1.min.js">
+</script>
+
+
+<!-- Bootstrap JS -->
+<script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
+<!-- JavaScript  -->
+<script src="/js/script.js"></script>
 
 </body>
 </html>
+```
