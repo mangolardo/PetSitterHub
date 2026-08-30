@@ -11,7 +11,7 @@
     "http"
   ],
   "paths": {
-    "/health": {
+    "/api/": {
       "get": {
         "description": "",
         "responses": {
@@ -21,7 +21,7 @@
         }
       }
     },
-    "/api/": {
+    "/api/health": {
       "get": {
         "description": "",
         "responses": {

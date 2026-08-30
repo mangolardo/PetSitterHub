@@ -17,10 +17,10 @@ router.get('/health', (req, res) => {
 });
 
 // definisci i router {require...}
-
+const auth = require('./authRouter')
 
 // imposta il router per ogni route
-
+router.use('/auth', auth)
 
 // imposta la route di swagger
 router.use('/API-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));

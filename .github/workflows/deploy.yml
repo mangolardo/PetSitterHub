@@ -11,9 +11,9 @@ on:
 
 # Variabili d'ambiente da personalizzare con i dati del tuo progetto GCP
 env:
-  PROJECT_ID: 'project-d0dedbe4-a22d-46ef-8cf'
+  PROJECT_ID: 'petsitterhub'
   REGION: 'europe-west6' # Inserisci la region che preferisci
-  GAR_LOCATION: 'europe-west6-docker.pkg.dev/project-d0dedbe4-a22d-46ef-8cf/petsitter-repo'
+  GAR_LOCATION: 'europe-west6-docker.pkg.dev/petsitterhub/petsitterhub-repo'
 
 jobs:
   # JOB 1: Test, Build e Deploy del BACKEND
