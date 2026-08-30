@@ -8,7 +8,6 @@ const queries = require('../../../database/queries');
     exports.register = async (req, res) => {
         try {
 
-
             //verifica se l'email esiste già
             const userExists = await db.query(queries.CHECK_EMAIL, [req.body.email]);
             if (userExists.rows.length > 0) {
