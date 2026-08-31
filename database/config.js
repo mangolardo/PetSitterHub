@@ -27,5 +27,9 @@ module.exports = {
     query: async (text, params) => {
         const pool = await poolPromise; //aspetta che la connessione sia pronta
         return pool.query(text, params);
-    }
+    },
+   connect : async (text, params) => {
+       const pool = await poolPromise; //aspetta che la connessione sia pronta
+       return pool.connect(text, params);
+   }
 };

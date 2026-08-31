@@ -8,6 +8,6 @@ router.get('/:id', sittersHandler.getSitterById);
 router.get('/:id/reviews', sittersHandler.reviews)
 router.get('/:id/services', sittersHandler.services)
 router.post('/services', verifyToken, sittersHandler.addService)
-router.delete('/servizi/:id', verifyToken, sittersHandler.deleteService);
+router.delete('/services/:id', verifyToken, sittersHandler.deleteService);
 
 module.exports = router;

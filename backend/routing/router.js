@@ -20,11 +20,13 @@ router.get('/health', (req, res) => {
 const auth = require('./authRouter')
 const sitters = require('./sittersRouter')
 const service = require('./serviceRouter')
+const bookings = require('./bookingsRouter')
 
 // imposta il router per ogni route
 router.use('/auth', auth)
 router.use('/sitters', sitters)
 router.use('/service',service)
+router.use('/bookings', bookings)
 
 // imposta la route di swagger
 router.use('/API-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));

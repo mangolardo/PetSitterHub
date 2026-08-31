@@ -17,9 +17,8 @@ const queries = require('../../../database/queries');
             //cripta la password
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
             //inserisce l'utente
-            if(req.body.contains('zona')) {
+            if(req.body.zona != null) {
                 const {nome,cognome,zona, email} = req.body;
                 await db.query(
                     queries.INSERT_PROP,
@@ -106,5 +105,111 @@ console.log(user)
             res.status(500).json({error: 'Errore interno del server'});
         }
     };
+exports.updateProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const userRole = req.user.ruolo; // 'proprietario' o 'professionista'
+
+        // Estraiamo i campi dal body. Se un campo non viene inviato, sarà undefined
+        const { nome, cognome, zona, email } = req.body;
+
+        let query = '';
+        let queryParams = [];
+
+        if (userRole === 'proprietario') {
+            query = queries.UPDATE_PROFILO_PROP;
+
+            queryParams = [nome || null, cognome || null, zona || null, email || null, userId];
+        } else if (userRole === 'professionista') {
+            query = queries.UPDATE_PROFILO_PROF;
+
+            queryParams = [nome || null, cognome || null, email || null, userId];
+        } else {
+            return res.status(403).json({ error: 'Ruolo non autorizzato' });
+        }
+
+        const result = await db.query(query, queryParams);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Utente non trovato' });
+        }
+
+        res.status(200).json({
+            message: 'Profilo aggiornato con successo',
+            user: result.rows[0] // Restituisce i nuovi dati aggiornati
+        });
+
+    } catch (error) {
+        // Gestione specifica per il vincolo UNIQUE sull'email (Errore Postgres 23505)
+        if (error.code === '23505') {
+            return res.status(409).json({ error: 'Questa email è già associata a un altro account.' });
+        }
+
+        console.error('Errore durante l\'aggiornamento del profilo:', error);
+        res.status(500).json({ error: 'Errore interno del server' });
+    }
+};
+
+exports.changePassword = async (req, res) => {
+    try {
+        // Questi dati vengono dal token JWT
+        const userId = req.user.id;
+        const userRole = req.user.ruolo; // Assicurati che nel login tu abbia salvato il ruolo nel token!
+
+        // Dati inviati dal form nel frontend
+        const { vecchia_password, nuova_password } = req.body;
+
+        if (!vecchia_password || !nuova_password) {
+            return res.status(400).json({ error: 'Devi inserire sia la vecchia che la nuova password' });
+        }
+
+        if (nuova_password.length < 6) {
+            return res.status(400).json({ error: 'La nuova password deve contenere almeno 6 caratteri' });
+        }
+
+        // 1. Capiamo quale query usare in base al ruolo
+        let queryGetPass = '';
+        let queryUpdatePass = '';
+
+        if (userRole === 'proprietario') {
+            queryGetPass = queries.GET_PASSWORD_PROP;
+            queryUpdatePass = queries.UPDATE_PASSWORD_PROP;
+        } else if (userRole === 'professionista') {
+            queryGetPass = queries.GET_PASSWORD_PROF;
+            queryUpdatePass = queries.UPDATE_PASSWORD_PROF;
+        } else {
+            return res.status(403).json({ error: 'Ruolo utente non valido' });
+        }
+
+        // 2. Recuperiamo l'hash della vecchia password dal database
+        const { rows } = await db.query(queryGetPass, [userId]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Utente non trovato' });
+        }
+
+        const hashSalvato = rows[0].password;
+
+        // 3. Verifichiamo che la "vecchia password" inserita sia corretta
+        const isMatch = await bcrypt.compare(vecchia_password, hashSalvato);
+
+        if (!isMatch) {
+            return res.status(401).json({ error: 'La vecchia password inserita non è corretta' });
+        }
+
+        // 4. La vecchia password è corretta! Criptiamo la nuova password
+        const saltRounds = 10;
+        const nuovoHash = await bcrypt.hash(nuova_password, saltRounds);
+
+        // 5. Salviamo la nuova password nel database
+        await db.query(queryUpdatePass, [nuovoHash, userId]);
+
+        res.status(200).json({ message: 'Password aggiornata con successo!' });
+
+    } catch (error) {
+        console.error('Errore durante il cambio password:', error);
+        res.status(500).json({ error: 'Errore interno del server' });
+    }
+};
 
 

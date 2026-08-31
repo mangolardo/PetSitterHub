@@ -9,7 +9,7 @@ exports.catalog = async (req, res) => {
     try {
         let  rows  = []
         // Parametri di query inviati dal frontend (es. ?citta=Milano)
-        if (req.query.contains('tipo_animale')){
+        if (req.query.length>2){
             const {zona, servizio,animale} = req.query;
             rows = await db.query(queries.GET_CAT_PROF,[zona,servizio,animale] )
         } else {
@@ -19,7 +19,7 @@ exports.catalog = async (req, res) => {
         if (rows.length === 0) {
             return res.status(401).json({error: 'Utente non trovato'})
         }
-        res.status(200).json(rows);
+        res.status(200).json(rows.rows);
     } catch (error) {
         console.error('Errore durante il recupero dei sitter:', error);
         res.status(500).json({ error: 'Errore interno del server' });
