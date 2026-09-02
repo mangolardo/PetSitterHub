@@ -110,7 +110,6 @@ exports.updateProfile = async (req, res) => {
         const userId = req.user.id;
         const userRole = req.user.ruolo; // 'proprietario' o 'professionista'
 
-        // Estraiamo i campi dal body. Se un campo non viene inviato, sarà undefined
         const { nome, cognome, zona, email } = req.body;
 
         let query = '';
@@ -167,7 +166,6 @@ exports.changePassword = async (req, res) => {
             return res.status(400).json({ error: 'La nuova password deve contenere almeno 6 caratteri' });
         }
 
-        // 1. Capiamo quale query usare in base al ruolo
         let queryGetPass = '';
         let queryUpdatePass = '';
 
@@ -181,7 +179,7 @@ exports.changePassword = async (req, res) => {
             return res.status(403).json({ error: 'Ruolo utente non valido' });
         }
 
-        // 2. Recuperiamo l'hash della vecchia password dal database
+
         const { rows } = await db.query(queryGetPass, [userId]);
 
         if (rows.length === 0) {
@@ -190,18 +188,15 @@ exports.changePassword = async (req, res) => {
 
         const hashSalvato = rows[0].password;
 
-        // 3. Verifichiamo che la "vecchia password" inserita sia corretta
         const isMatch = await bcrypt.compare(vecchia_password, hashSalvato);
 
         if (!isMatch) {
             return res.status(401).json({ error: 'La vecchia password inserita non è corretta' });
         }
 
-        // 4. La vecchia password è corretta! Criptiamo la nuova password
         const saltRounds = 10;
         const nuovoHash = await bcrypt.hash(nuova_password, saltRounds);
 
-        // 5. Salviamo la nuova password nel database
         await db.query(queryUpdatePass, [nuovoHash, userId]);
 
         res.status(200).json({ message: 'Password aggiornata con successo!' });
@@ -211,5 +206,6 @@ exports.changePassword = async (req, res) => {
         res.status(500).json({ error: 'Errore interno del server' });
     }
 };
+
 
 

@@ -6,13 +6,10 @@ exports.getService = async (req, res) => {
         const idServizio = req.params.id_service; //
 
         const {rows} = await db.query(queries.GET_SERVICE_BY_ID, [idServizio]);
-
-        // Se l'array è vuoto, significa che l'ID non esiste nel database
         if (rows.length === 0) {
             return res.status(404).json({error: 'Servizio non trovato'});
         }
 
-        // Restituisce l'oggetto del singolo servizio (il primo elemento dell'array)
         res.status(200).json(rows[0]);
 
     } catch (error) {
@@ -20,63 +17,73 @@ exports.getService = async (req, res) => {
         res.status(500).json({error: 'Errore interno durante il recupero del servizio'});
     }
 }
-exports.getAvailabilities = async (req, res) => {
+exports.services = async (req, res) => {
     try {
+        const idSitter= req.params.id;
 
-        const idServizio = req.params.id_service;
+        const { rows } = await db.query(queries.GET_SERVIZI, [idSitter]);
 
-        const { rows } = await db.query(queries.GET_DISP, [idServizio]);
-
+        // Se l'array è vuoto, significa che il sitter non ha ancora configurato i suoi servizi
+        // Restituiamo comunque 200 OK con un array vuoto, è la best practice.
         res.status(200).json(rows);
+
     } catch (error) {
-        console.error('Errore getSitterAvailability:', error);
-        res.status(500).json({ error: 'Errore durante il recupero delle disponibilità' });
+        console.error('Errore durante il recupero dei servizi:', error);
+        res.status(500).json({ error: 'Errore interno del server' });
     }
 };
-exports.addAvailability = async (req, res) => {
+exports.addService = async (req, res) => {
     try {
-        const professionistaId = req.user.id; // Dal token JWT
-        const id_servizio = req.params.id_service
-        const { data_inizio, data_fine } = req.body;
+        const professionistaId = req.user.id; // Estratto dal token JWT
+        const { tipologia, tariffa, tipo_animale, zona } = req.body;
 
-        if (new Date(data_inizio) >= new Date(data_fine)) {
-            return res.status(400).json({ error: 'La data di fine deve essere successiva a quella di inizio' });
-        }
-        const ownershipCheck = await db.query(queries.CHECK_SERVICE_OWNERSHIP, [id_servizio, professionistaId]);
-
-        if (ownershipCheck.rows.length === 0) {
-            return res.status(403).json({ error: 'Azione non consentita. Questo servizio non ti appartiene o non esiste.' });
+        // Validazione base dei campi obbligatori
+        if (!tipologia || !tariffa || !tipo_animale || !zona) {
+            return res.status(400).json({ error: 'Tutti i campi (tipologia, tariffa, tipo_animale, zona) sono obbligatori' });
         }
 
-        const result = await db.query(queries.ADD_AVAILABILITY, [data_inizio, data_fine, id_servizio]);
+        // Validazione sul prezzo (come richiesto dal CHECK nel DB)
+        if (tariffa < 0) {
+            return res.status(400).json({ error: 'La tariffa non può essere negativa' });
+        }
+
+        const result = await db.query(queries.ADD_SERVICE, [
+            tipologia,
+            tariffa,
+            tipo_animale,
+            zona,
+            professionistaId
+        ]);
 
         res.status(201).json({
-            message: 'Disponibilità aggiunta con successo',
-            disponibilita: result.rows[0]
+            message: 'Servizio creato con successo',
+            servizio: result.rows[0]
         });
 
     } catch (error) {
-        console.error('Errore addDisponibilita:', error);
-        res.status(500).json({ error: 'Errore durante il salvataggio della disponibilità' });
+        console.error('Errore addService:', error);
+        res.status(500).json({ error: 'Errore interno durante la creazione del servizio' });
     }
 };
-
-exports.deleteAvailability = async (req, res) => {
+exports.deleteService = async (req, res) => {
     try {
-        const professionistaId = req.user.id; // Dal token JWT
-        const idDisponibilita = req.params.id; //
-        const id_servizio = req.params.id_service
+        const professionistaId = req.user.id; // Estratto dal token JWT
+        const idServizio = req.params.id;     // L'ID del servizio da eliminare, preso dall'URL
 
-        const result = await db.query(queries.DELETE_AVAILABILITY, [idDisponibilita, professionistaId]);
+        const result = await db.query(queries.DELETE_SERVICE, [idServizio, professionistaId]);
 
-        //se rowCount è 0, o l'ID non esiste, o il professionista sta provando a cancellare roba di altri
+        // Se rowCount è 0, significa che l'ID del servizio non esiste
+        // OPPURE che il servizio esiste ma appartiene a un altro professionista (sicurezza!)
         if (result.rowCount === 0) {
-            return res.status(404).json({ error: 'Disponibilità non trovata o non sei autorizzato a rimuoverla' });
+            return res.status(404).json({ error: 'Servizio non trovato o non sei autorizzato a rimuoverlo' });
         }
 
-        res.status(200).json({ message: 'Disponibilità rimossa con successo' });
+        res.status(200).json({
+            message: 'Servizio eliminato con successo. Tutte le relative disponibilità sono state rimosse.'
+        });
+
     } catch (error) {
-        console.error('Errore deleteDisponibilita:', error);
-        res.status(500).json({ error: 'Errore durante la cancellazione' });
+        console.error('Errore deleteService:', error);
+        res.status(500).json({ error: 'Errore interno durante la cancellazione del servizio' });
     }
 };

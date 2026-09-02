@@ -6,5 +6,5 @@ const verifyToken = require('./authMiddleware')
 router.get('/',verifyToken,bookingHandler.getBookings)
 router.post('/book/:id_availability',verifyToken,bookingHandler.book)
 router.get('/:id',verifyToken,bookingHandler.getBooking)
-
+//router.get('/payment', verifyToken,authHandler.payments)
 module.exports = router;

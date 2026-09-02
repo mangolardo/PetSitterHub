@@ -12,9 +12,9 @@ module.exports = {
    // FIND_BY_ID: 'SELECT id, nome, cognome, email, data_registrazione FROM professionista WHERE id = $1 UNION SELECT id, nome, cognome, zona, email, data_registrazione FROM proprietari WHERE id = $1 ',
     GET_CAT_PROF: `SELECT P.id, nome, zona, tipologia, tariffa , tipo_animale  FROM professionista as P join servizio on P.id = id_professionista where zona = $1 AND tipologia = $2 `,
     GET_CAT_PROF_ANIMAL: `SELECT P.id, nome, zona, tipologia, tariffa , tipo_animale  FROM professionista as P  join servizio on P.id = id_professionista where zona = $1 AND tipologia = $2 AND tipo_animale = $3`,
-    GET_PROF_ID: `SELECT id, nome, cognome , data_registrazione  FROM professionista   where id = $1 `,
+    //GET_PROF_ID: `SELECT id, nome, cognome , data_registrazione  FROM professionista   where id = $1 `,
     GET_SERVIZI: 'SELECT id, tipologia, tariffa, tipo_animale, zona from servizio where id_professionista = $1',
-    GET_RECENSIONI: 'SELECT valutazione,commento,data_creazione,data_fine,data_inizio,tipologia from recensione as R join prenotazione P on R.id = P.id_prenotazione join servizio S on P.id_servizio = S.id  where id_professionista = $1',
+  //FIXxxx!!!!!!  GET_RECENSIONI: 'SELECT valutazione,commento,data_creazione,data_fine,data_inizio,tipologia from recensione as R join prenotazione P on R.id = P.id_prenotazione join servizio S on P.id_servizio = S.id  where id_professionista = $1',
     GET_DISP : 'SELECT id,data_inizio,data_fine,is_disponibile from disponibilita where id_servizio = $1',
     CHECK_SERVICE_OWNERSHIP: `SELECT id FROM servizio WHERE id = $1 AND id_professionista = $2`,
     ADD_AVAILABILITY: ` INSERT INTO disponibilita (data_inizio, data_fine, id_servizio)  VALUES ($1, $2, $3)RETURNING id, data_inizio, data_fine, is_disponibile, id_servizio`,
@@ -22,99 +22,79 @@ module.exports = {
     ADD_SERVICE: ` INSERT INTO servizio (tipologia, tariffa, tipo_animale, zona, id_professionista)  VALUES ($1, $2, $3, $4, $5) RETURNING id, tipologia, tariffa, tipo_animale, zona`,
     DELETE_SERVICE: `DELETE FROM servizio  WHERE id = $1 AND id_professionista = $2 RETURNING id`,
     GET_SERVICE_BY_ID: `SELECT S.id,  S.tipologia,S.tariffa, S.tipo_animale, S.zona,P.nome AS nome_professionista, P.cognome AS cognome_professionista FROM servizio S JOIN professionista P ON S.id_professionista = P.id WHERE S.id = $1 `,
-    LOCK_AVAILABILITY: ` UPDATE disponibilita  SET is_disponibile = FALSE  WHERE id = $1 AND is_disponibile = TRUE RETURNING id_servizio, data_inizio, data_fine `,
-    CREATE_BOOKING: ` INSERT INTO prenotazione (id_proprietario, id_servizio, data_inizio, data_fine) VALUES ($1, $2, $3, $4) RETURNING id, data_inizio, data_fine, stato, id_servizio `,
-    GET_PRENOTAZIONI_PROP: `
-        SELECT 
-            p.id AS id_prenotazione, 
-            p.data_inizio, 
-            p.data_fine, 
-            p.stato, 
-            p.data_richiesta,
-            s.tipologia AS nome_servizio,
-            s.tariffa,
-            prof.nome AS nome_professionista,
-            prof.cognome AS cognome_professionista
-        FROM prenotazione p
-        JOIN servizio s ON p.id_servizio = s.id
-        JOIN professionista prof ON s.id_professionista = prof.id
-        WHERE p.id_proprietario = $1
-        ORDER BY p.data_inizio DESC
-    `,
+    LOCK_AVAILABILITY: ` UPDATE disponibilita  SET is_disponibile = FALSE  WHERE id = $1 AND is_disponibile = TRUE RETURNING id, id_servizio, data_inizio, data_fine `,
+    CREATE_BOOKING: ` INSERT INTO prenotazione (id_proprietario, id_disponibilita) VALUES ($1, $2) RETURNING id, data_richiesta`,
+    CREATE_PENDING_BOOKING: `INSERT INTO prenotazione (id_proprietario, id_disponibilita, stato) VALUES ($1, $2, 'in_attesa')RETURNING id, id_disponibilita, stato, data_richiesta`,
+    CONFIRM_BOOKING: `UPDATE prenotazione SET stato = 'confermata' WHERE id = $1 AND stato = 'in_attesa'RETURNING id`,
+    EXPIRE_UNPAID_BOOKINGS: `WITH prenotazioni_scadute AS (UPDATE prenotazione SET stato = 'annullata'WHERE stato = 'in_attesa' AND data_richiesta < NOW() - INTERVAL '15 minutes'RETURNING id_disponibilita)
+        UPDATE disponibilita d
+        SET is_disponibile = TRUE
+        FROM prenotazioni_scadute ps
+        WHERE d.id = ps.id_disponibilita`,
+   GET_PRENOTAZIONI_PROP: `SELECT  P.id AS id_prenotazione,  D.data_inizio, D.data_fine,  P.stato,  P.data_richiesta,S.tipologia AS nome_servizio,PROF.nome AS nome_professionista, PROF.cognome AS cognome_professionista , PAY.importo
+FROM pagamento PAY JOIN prenotazione P ON PAY.id_prenotazione = P.id  JOIN disponibilita D ON P.id_disponibilita = D.id JOIN servizio S ON D.id_servizio = S.id JOIN professionista PROF ON S.id_professionista = PROF.id WHERE P.id_proprietario = $1 ORDER BY D.data_inizio DESC`,
     GET_PRENOTAZIONI_PROF: `
-        SELECT 
-            p.id AS id_prenotazione, 
-            p.data_inizio, 
-            p.data_fine, 
-            p.stato, 
-            p.data_richiesta,
-            s.tipologia AS nome_servizio,
-            s.tariffa,
-            pr.nome AS nome_proprietario,
-            pr.cognome AS cognome_proprietario
-        FROM proprietari pr JOIN prenotazione p on pr.id = p.id_proprietario JOIN servizio s ON p.id_servizio = s.id
-        WHERE p.id_proprietario = $1
-        ORDER BY p.data_inizio DESC
-    `,
-    GET_PRENOTAZIONE_PROP: `
-        SELECT 
-            p.id AS id_prenotazione, 
-            p.data_inizio, 
-            p.data_fine, 
-            p.stato, 
-            p.data_richiesta,
-            s.tipologia AS nome_servizio,
-            s.tariffa,
-            prof.nome AS nome_professionista,
-            prof.cognome AS cognome_professionista
-        FROM prenotazione p
-        JOIN servizio s ON p.id_servizio = s.id
-        JOIN professionista prof ON s.id_professionista = prof.id
-        WHERE p.id_proprietario = $1 AND p.id = $2
-        ORDER BY p.data_inizio DESC
-    `,
-    GET_PRENOTAZIONE_PROF: `
-        SELECT 
-            p.id AS id_prenotazione, 
-            p.data_inizio, 
-            p.data_fine, 
-            p.stato, 
-            p.data_richiesta,
-            s.tipologia AS nome_servizio,
-            s.tariffa,
-            pr.nome AS nome_proprietario,
-            pr.cognome AS cognome_proprietario
-        FROM proprietari pr JOIN prenotazione p on pr.id = p.id_proprietario JOIN servizio s ON p.id_servizio = s.id
-        WHERE p.id_proprietario = $1  AND p.id = $2
-        ORDER BY p.data_inizio DESC
-    `,
-    UPDATE_PROFILO_PROP: `
-        UPDATE proprietari 
-        SET 
-            nome = COALESCE($1, nome),
-            cognome = COALESCE($2, cognome),
-            zona = COALESCE($3, zona),
-            email = COALESCE($4, email)
-        WHERE id = $5
-        RETURNING id, nome, cognome, zona, email 
-    `,
+        WITH first AS (SELECT  P.id AS id_prenotazione,  D.data_inizio, D.data_fine,  P.stato,  P.data_richiesta,S.tipologia AS nome_servizio,PR.nome AS nome_proprietario, PR.cognome AS cognome_proprietario, S.id_professionista
+                       FROM proprietari PR JOIN prenotazione P ON PR.id = P.id_proprietario JOIN disponibilita D ON P.id_disponibilita = D.id JOIN servizio S ON D.id_servizio = S.id
+                       ORDER BY D.data_inizio DESC)
+        SELECT  fs.id_prenotazione, fs.data_inizio, fs.data_fine, fs.stato, fs.data_richiesta,fs.nome_servizio,fs. nome_proprietario,fs.cognome_proprietario, PAY.importo
+        FROM first fs JOIN pagamento PAY ON fs.id_prenotazione = PAY.id_prenotazione
+        WHERE fs.id_professionista = $1
+       `,
 
-    // Aggiorna il profilo del professionista (senza il campo zona)
-    UPDATE_PROFILO_PROF: `
-        UPDATE professionista 
-        SET 
-            nome = COALESCE($1, nome),
-            cognome = COALESCE($2, cognome),
-            email = COALESCE($3, email)
-        WHERE id = $4
-        RETURNING id, nome, cognome, email
-    `,
+
+    GET_PRENOTAZIONE_PROP: `SELECT  P.id AS id_prenotazione,  D.data_inizio, D.data_fine,  P.stato,  P.data_richiesta,S.tipologia AS nome_servizio,PROF.nome AS nome_professionista, PROF.cognome AS cognome_professionista , PAY.importo
+                            FROM pagamento PAY JOIN prenotazione P ON PAY.id_prenotazione = P.id  JOIN disponibilita D ON P.id_disponibilita = D.id JOIN servizio S ON D.id_servizio = S.id JOIN professionista PROF ON S.id_professionista = PROF.id WHERE P.id_proprietario = $1 AND P.id= $2 ORDER BY D.data_inizio DESC`,
+    GET_PRENOTAZIONE_PROF: `WITH first AS (SELECT  P.id AS id_prenotazione,  D.data_inizio, D.data_fine,  P.stato,  P.data_richiesta,S.tipologia AS nome_servizio,PR.nome AS nome_proprietario, PR.cognome AS cognome_proprietario, S.id_professionista
+                                           FROM proprietari PR JOIN prenotazione P ON PR.id = P.id_proprietario JOIN disponibilita D ON P.id_disponibilita = D.id JOIN servizio S ON D.id_servizio = S.id
+                                           ORDER BY D.data_inizio DESC)
+                            SELECT  fs.id_prenotazione, fs.data_inizio, fs.data_fine, fs.stato, fs.data_richiesta,fs.nome_servizio,fs. nome_proprietario,fs.cognome_proprietario, PAY.importo
+                            FROM first fs JOIN pagamento PAY ON fs.id_prenotazione = PAY.id_prenotazione
+                            WHERE fs.id_professionista = $1 AND fs.id_prenotazione = $2`,
+   GET_PRENOTAZIONE_STATO : `SELECT stato FROM prenotazione WHERE id = $1`,
+
+    UPDATE_PROFILO_PROP: `UPDATE proprietari SET nome = COALESCE($1, nome),cognome = COALESCE($2, cognome),zona = COALESCE($3, zona),email = COALESCE($4, email) WHERE id = $5 RETURNING id, nome, cognome, zona, email`,
+    UPDATE_PROFILO_PROF: `UPDATE professionista SET nome = COALESCE($1, nome), cognome = COALESCE($2, cognome), email = COALESCE($3, email) WHERE id = $4 RETURNING id, nome, cognome, email`,
     GET_PASSWORD_PROP: `SELECT password FROM proprietari WHERE id = $1`,
     UPDATE_PASSWORD_PROP: `UPDATE proprietari SET password = $1 WHERE id = $2`,
-
-    // --- PROFESSIONISTI ---
     GET_PASSWORD_PROF: `SELECT password FROM professionista WHERE id = $1`,
-    UPDATE_PASSWORD_PROF: `UPDATE professionista SET password = $1 WHERE id = $2`
+    UPDATE_PASSWORD_PROF: `UPDATE professionista SET password = $1 WHERE id = $2`,
+    CREATE_PAYMENT: `INSERT INTO pagamento (metodo, importo, id_prenotazione, stato)  VALUES ($1, $2, $3, $4) RETURNING *`,
+    UPDATE_PAYMENT_STATUS: `UPDATE pagamento SET stato = $1 WHERE id = $2 RETURNING *`,
+        GET_RECENSIONI_PROFESSIONISTA: `
+        SELECT 
+            r.id, 
+            r.valutazione, 
+            r.commento, 
+            r.data_creazione,
+            p.nome AS nome_proprietario,
+            p.cognome AS cognome_proprietario,
+            s.tipologia AS tipo_servizio
+        FROM recensione r
+        JOIN proprietari p ON r.id_proprietario = p.id
+        JOIN servizio s ON r.id_servizio = s.id
+        WHERE s.id_professionista = $1
+        ORDER BY r.data_creazione DESC
+    `,
 
+        CREATE_RECENSIONE: `
+        INSERT INTO recensione (valutazione, commento, id_servizio, id_proprietario)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, valutazione, commento, data_creazione
+    `,
 
+        DELETE_RECENSIONE: `
+        DELETE FROM recensione
+        WHERE id = $1 AND id_proprietario = $2
+        RETURNING id
+    `,
+    CHECK_PRENOTAZIONE_CONFERMATA: `
+        SELECT p.id 
+        FROM prenotazione p
+        JOIN disponibilita d ON p.id_disponibilita = d.id
+        WHERE p.id_proprietario = $1 
+          AND d.id_servizio = $2 
+          AND p.stato = 'confermata'
+        LIMIT 1
+    `
 };

@@ -5,9 +5,6 @@ verifyToken = require('./authMiddleware')
 
 router.get('/',sittersHandler.catalog)
 router.get('/:id', sittersHandler.getSitterById);
-router.get('/:id/reviews', sittersHandler.reviews)
-router.get('/:id/services', sittersHandler.services)
-router.post('/services', verifyToken, sittersHandler.addService)
-router.delete('/services/:id', verifyToken, sittersHandler.deleteService);
+
 
 module.exports = router;
