@@ -54,12 +54,9 @@ CREATE TABLE disponibilita (
 CREATE TABLE prenotazione (
                               id SERIAL PRIMARY KEY,
                               id_proprietario INTEGER NOT NULL REFERENCES proprietari(id) ON DELETE CASCADE,
-                              id_servizio INTEGER NOT NULL REFERENCES servizio(id) ON DELETE CASCADE,
-                              data_inizio TIMESTAMP NOT NULL,
-                              data_fine TIMESTAMP NOT NULL,
-                              stato VARCHAR(50) DEFAULT 'in_attesa' CHECK (stato IN ('in_attesa', 'confermata', 'rifiutata', 'completata', 'annullata')),
-                              data_richiesta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                              CHECK (data_fine > data_inizio)
+                              id_disponibilita INTEGER NOT NULL REFERENCES disponibilita(id) ,
+                              stato VARCHAR(50) DEFAULT 'in_attesa' CHECK (stato IN ('in_attesa', 'confermata','annullata')),
+                              data_richiesta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 6. Tabella Recensione
@@ -67,9 +64,11 @@ CREATE TABLE recensione (
                             id SERIAL PRIMARY KEY,
                             valutazione INTEGER NOT NULL CHECK (valutazione BETWEEN 1 AND 5),
                             commento TEXT,
-                            id_prenotazione INTEGER UNIQUE NOT NULL REFERENCES prenotazione(id) ON DELETE CASCADE,
+                            id_servizio INTEGER NOT NULL REFERENCES servizio(id) ON DELETE CASCADE,
+                            id_proprietario INTEGER NOT NULL REFERENCES proprietari(id) ON DELETE CASCADE,
                             data_creazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- 7. Tabella Pagamento
 CREATE TABLE pagamento (
@@ -77,7 +76,7 @@ CREATE TABLE pagamento (
                            metodo VARCHAR(50) NOT NULL,
                            importo DECIMAL(10, 2) NOT NULL CHECK (importo > 0),
                            id_prenotazione INTEGER UNIQUE NOT NULL REFERENCES prenotazione(id) ON DELETE CASCADE,
-                           stato VARCHAR(50) DEFAULT 'in_attesa' CHECK (stato IN ('in_attesa', 'completato', 'fallito', 'rimborsato')),
+                           stato VARCHAR(50) DEFAULT 'in_attesa' CHECK (stato IN ('in_attesa', 'completato', 'fallito')),
                            data_pagamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
