@@ -1,10 +1,20 @@
+//il token verrà allegato in automatico
+$.ajaxSetup({
+    beforeSend: function(xhr) {
+        const token = localStorage.getItem('token');
+        if (token) {
+            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        }
+    }
+});
+
 $(document).ready(function () {
     const API_URL = '/api/auth';
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/;
 
-    // Controlla la presenza di una sessione attiva all'avvio
     checkAuth();
 
-    // Mostra/Nascondi il campo 'zona' in base al tipo utente scelto
+    // Gestione campo Zona dinamico in registrazione
     $('#regRuolo').on('change', function () {
         if ($(this).val() === 'prop') {
             $('#zonaGroup').removeClass('d-none');
@@ -19,14 +29,21 @@ $(document).ready(function () {
     $('#registerForm').on('submit', function (e) {
         e.preventDefault();
 
+        const password = $('#regPassword').val();
+
+        if (!passwordRegex.test(password)) {
+            showAlert('La password deve contenere almeno una maiuscola, un numero e un carattere speciale.', 'danger');
+            $('#regPassword').addClass('is-invalid').focus();
+            return;
+        }
+
         const payload = {
             nome: $('#regNome').val().trim(),
             cognome: $('#regCognome').val().trim(),
             email: $('#regEmail').val().trim(),
-            password: $('#regPassword').val()
+            password: password
         };
 
-        // Aggiunge la zona se selezionato 'Proprietario'
         if ($('#regRuolo').val() === 'prop') {
             payload.zona = $('#regZona').val().trim();
         }
@@ -52,12 +69,19 @@ $(document).ready(function () {
     $('#loginForm').on('submit', function (e) {
         e.preventDefault();
 
-        const payload = {
-            email: $('#loginEmail').val().trim(),
-            password: $('#loginPassword').val()
-        };
+        const email = $('#loginEmail').val().trim();
+        const password = $('#loginPassword').val();
 
+        // Validazione Lato Client prima della chiamata AJAX
+        if (!passwordRegex.test(password)) {
+            showAlert('La password deve contenere almeno una maiuscola, un numero e un carattere speciale.', 'danger');
+            $('#loginPassword').addClass('is-invalid').focus();
+            return;
+        }
 
+        $('#loginPassword').removeClass('is-invalid');
+
+        const payload = { email, password };
 
         $.ajax({
             url: `${API_URL}/login`,
@@ -65,18 +89,15 @@ $(document).ready(function () {
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: function (response) {
-                // Salva sia il token che il ruolo nel localStorage
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('ruolo', response.ruolo);
 
                 showAlert('Login effettuato con successo! Reindirizzamento...', 'success');
 
-                // Redirect in base al ruolo restituito dal backend
                 setTimeout(function () {
                     if (response.ruolo === 'professionista') {
                         window.location.href = 'dashboard.html';
                     } else {
-                        // Se è proprietario puoi mandarlo alla home o a un'altra pagina
                         window.location.href = 'index.html';
                     }
                 }, 1000);
@@ -88,35 +109,38 @@ $(document).ready(function () {
         });
     });
 
+    // Rimuove lo stato di errore quando si digita
+    $(document).on('input', '#loginPassword, #regPassword', function () {
+        $(this).removeClass('is-invalid');
+    });
+
     // --- LOGOUT ---
     $(document).on('click', '#btn-logout, #btnLogout', function (e) {
-            e.preventDefault();
-            localStorage.removeItem('token');
-            localStorage.removeItem('ruolo');
-            window.location.href = 'login.html';
-        });
+        e.preventDefault();
+        localStorage.removeItem('token');
+        localStorage.removeItem('ruolo');
+        window.location.href = 'login.html';
+    });
 
-    // --- VERIFICA AUTENTICAZIONE  ---
+    // --- VERIFICA AUTENTICAZIONE ---
     function checkAuth() {
-            const token = localStorage.getItem('token');
-            const ruolo = localStorage.getItem('ruolo');
+        const token = localStorage.getItem('token');
+        const ruolo = localStorage.getItem('ruolo');
+        const isLoginPage = window.location.pathname.endsWith('login.html');
 
-            // Se si trova già nella pagina di login ed è già loggato come professionista, lo reindirizza alla dashboard
-            const isLoginPage = window.location.pathname.endsWith('login.html');
-
-            if (token && isLoginPage) {
-                if (ruolo === 'professionista') {
-                    window.location.href = 'dashboard.html';
-                }
+        if (token && isLoginPage) {
+            if (ruolo === 'professionista') {
+                window.location.href = 'dashboard.html';
             }
+        }
     }
 
-    // Helper per mostrare messaggi alert Bootstrap
+    // Helper per messaggi alert
     function showAlert(message, type) {
         const alert = $('#alertMessage');
         alert.removeClass('d-none alert-success alert-danger alert-info')
              .addClass(`alert-${type}`)
-             .text(message);
+             .html(message);
 
         setTimeout(() => alert.addClass('d-none'), 4000);
     }
