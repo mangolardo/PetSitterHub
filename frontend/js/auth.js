@@ -72,12 +72,6 @@ $(document).ready(function () {
         const email = $('#loginEmail').val().trim();
         const password = $('#loginPassword').val();
 
-        // Validazione Lato Client prima della chiamata AJAX
-        if (!passwordRegex.test(password)) {
-            showAlert('La password deve contenere almeno una maiuscola, un numero e un carattere speciale.', 'danger');
-            $('#loginPassword').addClass('is-invalid').focus();
-            return;
-        }
 
         $('#loginPassword').removeClass('is-invalid');
 
@@ -134,6 +128,92 @@ $(document).ready(function () {
             }
         }
     }
+
+    // --- CAMBIO PASSWORD ---
+    $('#update-password-form').on('submit', function (e) {
+        e.preventDefault();
+
+        const vecchiaPassword = $('#old-password').val();
+        const nuovaPassword = $('#new-password').val();
+        const $status = $('#password-status');
+        const $button = $(this).find('button[type="submit"]');
+
+        // Pulizia messaggio precedente
+        $status.removeClass('text-success text-danger').text('');
+
+        // Controllo campi vuoti
+        if (!vecchiaPassword || !nuovaPassword) {
+            $status
+                .addClass('text-danger')
+                .text('Compila tutti i campi.');
+            return;
+        }
+
+        // Controllo requisiti nuova password
+        if (!passwordRegex.test(nuovaPassword)) {
+            $status
+                .addClass('text-danger')
+                .text('La nuova password deve contenere almeno una maiuscola, un numero e un carattere speciale.');
+
+            $('#new-password').addClass('is-invalid').focus();
+            return;
+        }
+
+        // Controlla che la nuova password sia diversa dalla vecchia
+        if (vecchiaPassword === nuovaPassword) {
+            $status
+                .addClass('text-danger')
+                .text('La nuova password deve essere diversa da quella attuale.');
+            return;
+        }
+
+        const payload = {
+            vecchia_password: vecchiaPassword,
+            nuova_password: nuovaPassword
+        };
+
+        // Disabilita il pulsante durante la richiesta
+        $button.prop('disabled', true);
+
+        $.ajax({
+            url: `${API_URL}/me/password`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+
+            success: function (response) {
+                $status
+                    .removeClass('text-danger')
+                    .addClass('text-success')
+                    .text(response.message || 'Password aggiornata con successo!');
+
+                // Svuota i campi
+                $('#old-password').val('');
+                $('#new-password').val('');
+
+                // Rimuove eventuali errori grafici
+                $('#old-password, #new-password').removeClass('is-invalid');
+            },
+
+            error: function (xhr) {
+                console.error('Errore cambio password:', xhr);
+
+                const errorMsg =
+                    xhr.responseJSON?.error ||
+                    'Errore durante l\'aggiornamento della password.';
+
+                $status
+                    .removeClass('text-success')
+                    .addClass('text-danger')
+                    .text(errorMsg);
+            },
+
+            complete: function () {
+                // Riabilita il pulsante
+                $button.prop('disabled', false);
+            }
+        });
+    });
 
     // Helper per messaggi alert
     function showAlert(message, type) {
