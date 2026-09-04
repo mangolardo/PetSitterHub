@@ -63,14 +63,15 @@
 
                         <!-- Selezione Servizio / Sitter -->
                         <div class="mb-4">
-                            <label for="booking-servizio" class="form-label fw-semibold">Servizio Selezionato</label>
+                            <label for="booking-servizio-text" class="form-label fw-semibold">Servizio Selezionato</label>
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-heart-pulse"></i>
                                 </span>
-                                <select id="booking-servizio" class="form-select" required>
-                                    <option value="" disabled selected>Caricamento servizi disponibili...</option>
-                                </select>
+                                <!-- Input di testo bloccato per impedire modifiche -->
+                                <input type="text" id="booking-servizio-text" class="form-control bg-light" value="Caricamento servizio..." readonly required>
+                                <!-- Campo nascosto per conservare l'ID del servizio -->
+                                <input type="hidden" id="booking-servizio-id">
                             </div>
                         </div>
 
@@ -94,12 +95,6 @@
                                     <input type="datetime-local" id="data-fine" class="form-control" required>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Campo Note Aggiuntive -->
-                        <div class="mb-4">
-                            <label for="booking-note" class="form-label fw-semibold">Note o Richieste Speciali (Opzionale)</label>
-                            <textarea id="booking-note" class="form-control" rows="3" placeholder="Es. Dettagli sul carattere dell'animale o istruzioni speciali..."></textarea>
                         </div>
 
                         <!-- Bottone di Invio Prenotazione -->
@@ -130,97 +125,8 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Script Logica Prenotazione AJAX -->
-<script>
-    $(document).ready(function () {
-        const token = localStorage.getItem('token');
 
-        // 1. Controllo Autenticazione: Se non c'è il token, reindirizza al Login
-        if (!token) {
-            window.location.href = "login.html";
-            return;
-        }
-
-        // Configura il Token Authorization per tutte le chiamate AJAX
-        $.ajaxSetup({
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        });
-
-        // 2. Caricamento dinamico dei servizi
-        $.ajax({
-            url: "/api/servizi",
-            method: "GET",
-            success: function (servizi) {
-                const $select = $("#booking-servizio");
-                $select.empty().append('<option value="" disabled selected>Scegli un servizio...</option>');
-
-                servizi.forEach(function (s) {
-                    $select.append(`
-                        <option value="${s.id}">
-                            ${s.tipologia} - ${s.tipo_animale} (€${s.tariffa} in ${s.zona})
-                        </option>
-                    `);
-                });
-            },
-            error: function () {
-                $("#booking-servizio").html('<option value="">Errore nel caricamento dei servizi</option>');
-            }
-        });
-
-        // 3. Gestione Submit Form
-        $("#booking-form").on("submit", function (e) {
-            e.preventDefault();
-
-            const dataInizio = $("#data-inizio").val();
-            const dataFine = $("#data-fine").val();
-            const idServizio = $("#booking-servizio").val();
-            const note = $("#booking-note").val() ? $("#booking-note").val().trim() : "";
-
-            const $status = $("#booking-status");
-
-            if (!idServizio || !dataInizio || !dataFine) {
-                $status.text("Compila tutti i campi obbligatori.").css("color", "#d95e40");
-                return;
-            }
-
-            if (new Date(dataFine) <= new Date(dataInizio)) {
-                $status.text("La data di fine deve essere successiva alla data di inizio.").css("color", "#d95e40");
-                return;
-            }
-
-            const bookingData = {
-                id_servizio: parseInt(idServizio),
-                data_inizio: dataInizio,
-                data_fine: dataFine,
-                note: note
-            };
-
-            $status.text("Invio richiesta in corso...").css("color", "green");
-
-            // Invio Dati al Backend
-            $.ajax({
-                url: "/api/prenotazioni",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(bookingData),
-                success: function (response) {
-                    $status.text("Prenotazione registrata! Reindirizzamento al pagamento...").css("color", "green");
-
-                    // Reindirizza alla pagina di pagamento passandogli l'ID della prenotazione creata
-                    setTimeout(function() {
-                        window.location.href = `pagamento.html?booking_id=${response.id || ''}`;
-                    }, 1200);
-                },
-                error: function (xhr) {
-                    const errorMsg = xhr.responseJSON?.message || "Errore durante l'invio della prenotazione.";
-                    $status.text(errorMsg).css("color", "#d95e40");
-                }
-            });
-        });
-    });
-</script>
+<script src="js/prenotazione.js"></script>
 
 </body>
 </html>
