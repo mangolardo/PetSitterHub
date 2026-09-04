@@ -24,6 +24,7 @@ const bookings = require('./bookingsRouter')
 const payment = require('./paymentRouter')
 const reviews = require('./reviewsRouter')
 const avail = require('./availabilitiesRouter')
+const messages = require ('./messagesRouter')
 // imposta il router per ogni route
 router.use('/auth', auth)
 router.use('/sitters', sitters)
@@ -32,6 +33,7 @@ router.use('/bookings', bookings)
 router.use('/payment',payment)
 router.use('/reviews',reviews)
 router.use('/availabilities',avail)
+router.use('/messages', messages)
 // imposta la route di swagger
 router.use('/API-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 

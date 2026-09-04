@@ -32,5 +32,5 @@ cron.schedule('* * * * *', async () => {
     }
 });
 app.listen(PORT, () => {
-    console.log('Server in ascolto sulla porta ${PORT}');
+    console.log(`Server in ascolto sulla porta ${PORT}`);
 });

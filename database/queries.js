@@ -6,15 +6,11 @@ module.exports = {
     INSERT_PROP: 'INSERT INTO proprietari  (nome,cognome,zona, email, password) VALUES ($1, $2, $3, $4, $5)',
     FIND_PROP_EMAIL: 'SELECT * FROM proprietari WHERE email = $1',
     FIND_PROF_EMAIL: 'SELECT * FROM professionista WHERE email = $1',
-  //  FIND_BY_EMAIL: 'SELECT id, nome, cognome, email, data_registrazione FROM professionista WHERE email = $1 UNION SELECT id, nome, cognome, zona, email, data_registrazione FROM proprietari WHERE email = $1 ',
     FIND_PROP_ID: 'SELECT id, nome, cognome, zona, email, data_registrazione FROM proprietari WHERE id = $1',
     FIND_PROF_ID: 'SELECT id, nome, cognome, email, data_registrazione FROM professionista WHERE id = $1',
-   // FIND_BY_ID: 'SELECT id, nome, cognome, email, data_registrazione FROM professionista WHERE id = $1 UNION SELECT id, nome, cognome, zona, email, data_registrazione FROM proprietari WHERE id = $1 ',
     GET_CAT_PROF: `SELECT P.id, nome, zona, tipologia, tariffa , tipo_animale  FROM professionista as P join servizio on P.id = id_professionista where zona = $1 AND tipologia = $2 `,
     GET_CAT_PROF_ANIMAL: `SELECT P.id, nome, zona, tipologia, tariffa , tipo_animale  FROM professionista as P  join servizio on P.id = id_professionista where zona = $1 AND tipologia = $2 AND tipo_animale = $3`,
-    //GET_PROF_ID: `SELECT id, nome, cognome , data_registrazione  FROM professionista   where id = $1 `,
     GET_SERVIZI: 'SELECT id, tipologia, tariffa, tipo_animale, zona from servizio where id_professionista = $1',
-  //FIXxxx!!!!!!  GET_RECENSIONI: 'SELECT valutazione,commento,data_creazione,data_fine,data_inizio,tipologia from recensione as R join prenotazione P on R.id = P.id_prenotazione join servizio S on P.id_servizio = S.id  where id_professionista = $1',
     GET_DISP : 'SELECT id,data_inizio,data_fine,is_disponibile from disponibilita where id_servizio = $1',
     CHECK_SERVICE_OWNERSHIP: `SELECT id FROM servizio WHERE id = $1 AND id_professionista = $2`,
     ADD_AVAILABILITY: ` INSERT INTO disponibilita (data_inizio, data_fine, id_servizio)  VALUES ($1, $2, $3)RETURNING id, data_inizio, data_fine, is_disponibile, id_servizio`,
@@ -61,40 +57,18 @@ FROM pagamento PAY JOIN prenotazione P ON PAY.id_prenotazione = P.id  JOIN dispo
     UPDATE_PASSWORD_PROF: `UPDATE professionista SET password = $1 WHERE id = $2`,
     CREATE_PAYMENT: `INSERT INTO pagamento (metodo, importo, id_prenotazione, stato)  VALUES ($1, $2, $3, $4) RETURNING *`,
     UPDATE_PAYMENT_STATUS: `UPDATE pagamento SET stato = $1 WHERE id = $2 RETURNING *`,
-        GET_RECENSIONI_PROFESSIONISTA: `
-        SELECT 
-            r.id, 
-            r.valutazione, 
-            r.commento, 
-            r.data_creazione,
-            p.nome AS nome_proprietario,
-            p.cognome AS cognome_proprietario,
-            s.tipologia AS tipo_servizio
-        FROM recensione r
-        JOIN proprietari p ON r.id_proprietario = p.id
-        JOIN servizio s ON r.id_servizio = s.id
-        WHERE s.id_professionista = $1
-        ORDER BY r.data_creazione DESC
-    `,
-
-        CREATE_RECENSIONE: `
-        INSERT INTO recensione (valutazione, commento, id_servizio, id_proprietario)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id, valutazione, commento, data_creazione
-    `,
-
-        DELETE_RECENSIONE: `
-        DELETE FROM recensione
-        WHERE id = $1 AND id_proprietario = $2
-        RETURNING id
-    `,
-    CHECK_PRENOTAZIONE_CONFERMATA: `
-        SELECT p.id 
-        FROM prenotazione p
-        JOIN disponibilita d ON p.id_disponibilita = d.id
-        WHERE p.id_proprietario = $1 
-          AND d.id_servizio = $2 
-          AND p.stato = 'confermata'
-        LIMIT 1
-    `
+    GET_RECENSIONI_PROFESSIONISTA: ` SELECT  r.id,  r.valutazione, r.commento,  r.data_creazione,p.nome AS nome_proprietario, p.cognome AS cognome_proprietario, s.tipologia AS tipo_servizio
+     FROM recensione r  JOIN proprietari p ON r.id_proprietario = p.id JOIN servizio s ON r.id_servizio = s.id WHERE s.id_professionista = $1 ORDER BY r.data_creazione DESC `,
+    CREATE_RECENSIONE: `
+        INSERT INTO recensione (valutazione, commento, id_servizio, id_proprietario) VALUES ($1, $2, $3, $4) RETURNING id, valutazione, commento, data_creazione `,
+    DELETE_RECENSIONE: ` DELETE FROM recensione  WHERE id = $1 AND id_proprietario = $2 RETURNING id`,
+    CHECK_PRENOTAZIONE_CONFERMATA: ` SELECT p.id  FROM prenotazione p JOIN disponibilita d ON p.id_disponibilita = d.id WHERE p.id_proprietario = $1   AND d.id_servizio = $2  AND p.stato = 'confermata'  LIMIT 1  `,
+    //se esiste conversazione restituisci id, se no crea e restituisci id
+    INITIATE_CONVERSATION: ` INSERT INTO conversazione (id_proprietario, id_professionista) VALUES ($1, $2) ON CONFLICT (id_proprietario, id_professionista)  DO UPDATE SET id_proprietario = EXCLUDED.id_proprietario RETURNING id  `,
+    GET_CONVERSATIONS_PROPRIETARIO: `   SELECT c.id, c.id_professionista, p.nome, p.cognome, MAX(m.data_invio) AS ultimo_messaggio FROM conversazione c JOIN professionista p ON c.id_professionista = p.id LEFT JOIN messaggio m ON c.id = m.id_conversazione  WHERE c.id_proprietario = $1  GROUP BY c.id, p.nome, p.cognome  ORDER BY ultimo_messaggio DESC NULLS LAST`,
+    GET_CONVERSATIONS_PROFESSIONISTA: `  SELECT c.id, c.id_proprietario, p.nome, p.cognome, p.zona, MAX(m.data_invio) AS ultimo_messaggio FROM conversazione c JOIN proprietari p ON c.id_proprietario = p.id LEFT JOIN messaggio m ON c.id = m.id_conversazione   WHERE c.id_professionista = $1 GROUP BY c.id, p.nome, p.cognome, p.zona ORDER BY ultimo_messaggio DESC NULLS LAST`,
+    CHECK_CONVERSATION_ACCESS: `  SELECT id FROM conversazione    WHERE id = $1 AND (id_proprietario = $2 OR id_professionista = $2)  `,
+    GET_MESSAGES: `   SELECT id, id_mittente, tipo_mittente, testo, data_invio  FROM messaggio  WHERE id_conversazione = $1   ORDER BY data_invio `,
+    INSERT_MESSAGE: ` INSERT INTO messaggio (id_conversazione, id_mittente, tipo_mittente, testo)  VALUES ($1, $2, $3, $4)  RETURNING id, id_mittente, tipo_mittente, testo, data_invio `,
+    DELETE_MESSAGE: `  DELETE FROM messaggio    WHERE id = $1     AND id_mittente = $2   AND tipo_mittente = $3  RETURNING id `
 };
