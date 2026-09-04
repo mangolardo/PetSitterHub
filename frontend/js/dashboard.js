@@ -1,6 +1,6 @@
 $(document).ready(function () {
-    const SITTERS_API = '/api/sitters';
-    const AUTH_API = '/api/auth';
+    const SITTERS_API = '${API_BASE_URL}/sitters';
+    const AUTH_API = '${API_BASE_URL}/auth';
     const token = localStorage.getItem('token');
     const ruolo = localStorage.getItem('ruolo');
     let currentUserId = null;

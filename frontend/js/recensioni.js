@@ -58,7 +58,7 @@ $(document).ready(function () {
         }
 
         $.ajax({
-            url: `/api/recensioni/${targetId}`,
+            url: `${API_BASE_URL}/recensioni/${targetId}`,
             method: 'GET',
             success: function (reviews) {
                 $reviewsList.empty();
@@ -187,7 +187,7 @@ $(document).ready(function () {
         };
 
         $.ajax({
-            url: '/api/recensioni/add',
+            url: '${API_BASE_URL}/recensioni/add',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(payload),
@@ -219,7 +219,7 @@ $(document).ready(function () {
         }
 
         $.ajax({
-            url: `/api/recensioni/delete/${idRecensione}`,
+            url: `${API_BASE_URL}/recensioni/delete/${idRecensione}`,
             method: 'DELETE',
             success: function (response) {
                 showAlert(response.message || 'Recensione eliminata.', 'success');

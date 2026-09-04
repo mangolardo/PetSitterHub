@@ -5,7 +5,7 @@ $(document).ready(function () {
     }
 
     // Configura la base URL delle API Express
-    const API_BASE_URL = '/api';
+    const API_BASE_URL = "${API_BASE_URL}";
 
     // Recupera l'ID del servizio dall'URL
     const urlParams = new URLSearchParams(window.location.search);

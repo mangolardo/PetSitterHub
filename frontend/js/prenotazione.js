@@ -40,7 +40,7 @@ $(document).ready(function () {
 
     // 3. Carica i dettagli dello slot di disponibilità e del relativo servizio
     $.ajax({
-        url: `/api/disponibilita/${idDisponibilita}`,
+        url: `${API_BASE_URL}/disponibilita/${idDisponibilita}`,
         method: "GET",
         success: function (slot) {
             const descrizione = `${slot.tipologia || 'Servizio'} - ${slot.tipo_animale || ''} (€${parseFloat(slot.tariffa || 0).toFixed(2)} in ${slot.zona || 'zona'})`;
@@ -73,7 +73,7 @@ $(document).ready(function () {
 
         // Chiamata POST all'endpoint definito nel router: /api/prenotazioni/book/:id_availability
         $.ajax({
-            url: `/api/prenotazioni/book/${idDisponibilita}`,
+            url: `${API_BASE_URL}/prenotazioni/book/${idDisponibilita}`,
             method: "POST",
             contentType: "application/json",
             success: function (response) {

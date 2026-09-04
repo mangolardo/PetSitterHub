@@ -51,7 +51,7 @@ $(document).ready(function () {
 
         // Chiamata AJAX
         $.ajax({
-            url: "/api/sitters",
+            url: "${API_BASE_URL}/sitters",
             method: "GET",
             data: queryParams,
             success: function (serviziList) {

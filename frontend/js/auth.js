@@ -9,7 +9,7 @@ $.ajaxSetup({
 });
 
 $(document).ready(function () {
-    const API_URL = '/api/auth';
+    const API_URL = '${API_BASE_URL}/auth';
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/;
 
     checkAuth();
