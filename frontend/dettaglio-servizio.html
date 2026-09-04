@@ -67,106 +67,53 @@
                     </div>
                     <div class="col">
                         <div class="d-flex flex-wrap align-items-center gap-2">
-                            <h1 class="h3 font-weight-bold mb-0" id="sitterName">Marco Rossi</h1>
+                            <h1 class="h3 font-weight-bold mb-0" id="sitterName">Caricamento...</h1>
                             <span class="verified-badge">
                                 <i class="bi bi-shield-check"></i> Verificato
                             </span>
                         </div>
                         <p class="zone text-muted mb-1 mt-1">
-                            <i class="bi bi-geo-alt color-green me-1"></i><span id="sitterZone">Milano Centro</span>
+                            <i class="bi bi-geo-alt color-green me-1"></i><span id="sitterZone">-</span>
                         </p>
                     </div>
                     <div class="col-auto text-end">
                         <div class="rating d-inline-block px-3 py-2">
                             <i class="bi bi-star-fill text-warning me-1 fs-5"></i>
-                            <strong class="fs-5" id="sitterRating">4.9</strong>
-                            <span class="text-muted small ms-1" id="reviewsCount">(12 recensioni)</span>
+                            <strong class="fs-5" id="sitterRating">-</strong>
+                            <span class="text-muted small ms-1" id="reviewsCount">(0 recensioni)</span>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- GRIGLIA PRINCIPALE (2 Colonne) -->
             <div class="row g-4">
 
-                <!-- COLONNA SINISTRA: Caratteristiche & Recensioni -->
+                <!-- COLONNA SINISTRA: Titolo, Descrizione e Recensioni -->
                 <div class="col-12 col-lg-8">
-
-                    <!-- Caratteristiche Servizio -->
+                    <!-- Box Titolo e Descrizione -->
                     <div class="dash-card p-4 mb-4">
-                        <h2 class="h4 font-weight-bold mb-3 color-green">
-                            <i class="bi bi-info-circle me-2"></i>Descrizione del Servizio
-                        </h2>
-                        <h3 class="h5 fw-bold text-dark" id="serviceTitle">Passeggiata ed Esercizio per Cani</h3>
-                        <p class="text-muted leading-relaxed" id="serviceDescription">
-                            Servizio di passeggiata personalizzata per il tuo cane. Garantisco attenzione costante, gioco attivo e somministrazione di acqua fresca. Adatto a cani di tutte le taglie ed età.
-                        </p>
-
-                        <hr class="my-4" style="border-color: var(--border);">
-
-                        <!-- Specifiche e dettagli in pillole -->
-                        <h3 class="h6 font-weight-bold text-uppercase section-eyebrow mb-3">Caratteristiche Incluse</h3>
-                        <div class="row g-3" id="featuresGrid">
-                            <div class="col-sm-6">
-                                <div class="d-flex align-items-center gap-2 p-2 rounded-3 bg-light border">
-                                    <i class="bi bi-check-circle-fill text-success fs-5"></i>
-                                    <span class="fw-semibold">Aggiornamenti foto/video live</span>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="d-flex align-items-center gap-2 p-2 rounded-3 bg-light border">
-                                    <i class="bi bi-check-circle-fill text-success fs-5"></i>
-                                    <span class="fw-semibold">Somministrazione pappa / acqua</span>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="d-flex align-items-center gap-2 p-2 rounded-3 bg-light border">
-                                    <i class="bi bi-check-circle-fill text-success fs-5"></i>
-                                    <span class="fw-semibold">Somministrazione farmaci di base</span>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="d-flex align-items-center gap-2 p-2 rounded-3 bg-light border">
-                                    <i class="bi bi-check-circle-fill text-success fs-5"></i>
-                                    <span class="fw-semibold">Primo incontro di conoscenza gratis</span>
-                                </div>
-                            </div>
-                        </div>
+                        <h2 class="h4 font-weight-bold mb-3" id="serviceTitle">Titolo Servizio</h2>
                     </div>
 
-                    <!-- Sezione Recensioni -->
+                    <!-- Box Recensioni -->
                     <div class="dash-card p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h2 class="h4 font-weight-bold mb-0 color-green">
-                                <i class="bi bi-chat-square-quote me-2"></i>Recensioni dei Proprieta'
-                            </h2>
-                            <span class="badge bg-light text-dark border px-3 py-2 fw-bold" id="badgeAvgRating">
-                                4.9 / 5.0
-                            </span>
-                        </div>
-
-                        <!-- Lista Recensioni -->
+                        <h3 class="h5 font-weight-bold mb-3">Recensioni dei Clienti</h3>
                         <div id="reviewsList" class="d-flex flex-column gap-3">
-                            <!-- Le recensioni verranno iniettate dinamicamente -->
+                            <!-- Le recensioni verranno iniettate qui da JavaScript -->
                         </div>
                     </div>
-
                 </div>
 
                 <!-- COLONNA DESTRA: Box Prenotazione e Tariffa -->
                 <div class="col-12 col-lg-4">
                     <div class="dash-card p-4 sticky-lg-top" style="top: 100px;">
-                        <span class="text-muted d-block small">Tariffa a sessione</span>
+                        <span class="text-muted d-block small">Tariffa oraria</span>
                         <div class="d-flex align-items-baseline gap-1 mb-3">
-                            <strong class="color-green fs-2" id="servicePrice">€15.00</strong>
-                            <span class="text-muted">/ ora</span>
+                            <strong class="color-green fs-2" id="servicePrice">€0.00</strong>
                         </div>
 
                         <hr style="border-color: var(--border);">
-
-                        <div class="mb-3">
-                            <small class="text-muted d-block mb-1"><i class="bi bi-shield-lock me-1"></i> Garanzia PetSitterHub</small>
-                            <p class="small text-muted mb-0">Prenotando tramite la piattaforma il tuo animale è coperto da protezione sanitaria integrata.</p>
-                        </div>
 
                         <a id="btnBookNow" href="#" class="btn btn-coral w-100 py-3 rounded-pill fs-5 font-weight-bold shadow-sm">
                             <i class="bi bi-calendar-check me-2"></i> Prenota Servizio
@@ -174,11 +121,11 @@
                     </div>
                 </div>
 
-            </div>
+            </div> <!-- Fine row -->
 
-        </div>
+        </div> <!-- Fine detailContent -->
 
-    </div>
+    </div> <!-- Fine container -->
 </main>
 
 <!-- FOOTER -->
@@ -193,90 +140,7 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Script caricamento dati simulati o da backend -->
-<script>
-    $(document).ready(function () {
-        function escapeHtml(text) {
-            return $('<div>').text(text || '').html();
-        }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const idServizio = urlParams.get('id_servizio') || urlParams.get('id');
-
-        // Simulazione caricamento da API / Dati Mock
-        setTimeout(function () {
-            const mockData = {
-                id: idServizio || 101,
-                sitter_nome: "Marco",
-                sitter_cognome: "Rossi",
-                zona: "Milano Centro",
-                valutazione: "4.9",
-                servizio_nome: "Passeggiata ed Esercizio per Cani",
-                tariffa: "15.00",
-                descrizione: "Offro passeggiate giornaliere per cani di tutte le taglie. Il servizio dura 60 minuti e include percorsi nei parchi principali di Milano, somministrazione di acqua e tanta attenzione personalizzata.",
-                recensioni: [
-                    {
-                        autore: "Giulia M.",
-                        voto: 5,
-                        data: "12 Febbraio 2026",
-                        testo: "Marco è stato fantastico con il mio Labradoodle! Puntuale, affettuoso e super professionale. Consigliatissimo!"
-                    },
-                    {
-                        autore: "Stefano B.",
-                        voto: 5,
-                        data: "28 Gennaio 2026",
-                        testo: "Servizio impeccabile. Mi ha inviato tante foto durante la passeggiata e al mio ritorno il cane era felice e rilassato."
-                    },
-                    {
-                        autore: "Elena R.",
-                        voto: 4,
-                        data: "15 Gennaio 2026",
-                        testo: "Molto bravo e attento ai bisogni del cane. Sicuramente ricontatterò Marco!"
-                    }
-                ]
-            };
-
-            // Popola i dati nella pagina
-            $("#sitterName").text(`${mockData.sitter_nome} ${mockData.sitter_cognome}`);
-            $("#sitterZone").text(mockData.zona);
-            $("#sitterRating, #badgeAvgRating").text(mockData.valutazione);
-            $("#reviewsCount").text(`(${mockData.recensioni.length} recensioni)`);
-            $("#serviceTitle").text(mockData.servizio_nome);
-            $("#serviceDescription").text(mockData.descrizione);
-            $("#servicePrice").text(`€${parseFloat(mockData.tariffa).toFixed(2)}`);
-            $("#btnBookNow").attr("href", `pagamento.html?id_servizio=${mockData.id}`);
-
-            // Renderizza le recensioni
-            const $reviewsList = $("#reviewsList");
-            $reviewsList.empty();
-
-            mockData.recensioni.forEach(function (rec) {
-                let stelleHTML = '';
-                for (let i = 1; i <= 5; i++) {
-                    stelleHTML += `<i class="bi bi-star-fill ${i <= rec.voto ? 'text-warning' : 'text-muted opacity-25'}"></i>`;
-                }
-
-                $reviewsList.append(`
-                    <div class="p-3 bg-paper rounded-4 border">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                                <strong class="d-block text-dark">${escapeHtml(rec.autore)}</strong>
-                                <small class="text-muted" style="font-size: 0.8rem;">${escapeHtml(rec.data)}</small>
-                            </div>
-                            <div>${stelleHTML}</div>
-                        </div>
-                        <p class="mb-0 text-secondary small">${escapeHtml(rec.testo)}</p>
-                    </div>
-                `);
-            });
-
-            // Mostra il contenuto e nasconde il loader
-            $("#loader").addClass("d-none");
-            $("#detailContent").removeClass("d-none");
-
-        }, 600);
-    });
-</script>
+<script src="js/dettaglio-servizio.js"></script>
 
 </body>
 </html>
