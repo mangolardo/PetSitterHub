@@ -1,17 +1,17 @@
 $(document).ready(function () {
-    // previene attacchi XSS
+    // Previene attacchi XSS
     function escapeHtml(text) {
         return $('<div>').text(text || '').html();
     }
 
-    // Configura la base URL delle tue API Express (modifica la porta se diversa)
-    const API_BASE_URL = 'http://localhost:3000/api';
+    // Configura la base URL delle API Express
+    const API_BASE_URL = '/api';
 
     // Recupera l'ID del servizio dall'URL
     const urlParams = new URLSearchParams(window.location.search);
     const idServizio = urlParams.get('id_servizio') || urlParams.get('id');
 
-    // Se manca l'ID del servizio, reindirizza o mostra un errore
+    // Se manca l'ID del servizio, reindirizza al catalogo
     if (!idServizio) {
         $("#loader").addClass("d-none");
         alert("Nessun servizio specificato.");
@@ -19,21 +19,22 @@ $(document).ready(function () {
         return;
     }
 
+    // Imposta subito l'ID servizio nell'input hidden del form di recensione
+    $('#reviewServizioId').val(idServizio);
+
     // Carica i dati del servizio dal backend
     loadServiceDetails(idServizio);
 
     /**
-     * Chiamata GET all'endpoint /services/:id_service
+     * Chiamata GET all'endpoint /api/servizi/:id
      */
     function loadServiceDetails(id) {
         $.ajax({
-            url: `${API_BASE_URL}/services/${id}`,
+            url: `${API_BASE_URL}/servizi/${id}`,
             method: 'GET',
             dataType: 'json',
             success: function (servizio) {
                 renderServiceData(servizio);
-
-                // Carica le disponibilità se vuoi mostrarle in pagina
                 loadAvailabilities(id);
             },
             error: function (xhr, status, error) {
@@ -51,16 +52,15 @@ $(document).ready(function () {
     }
 
     /**
-     * Chiamata GET per le disponibilità (utilizza la funzione getAvailabilities del controller)
+     * Chiamata GET per le disponibilità del servizio
      */
     function loadAvailabilities(id) {
         $.ajax({
-            url: `${API_BASE_URL}/services/${id}/availabilities`,
+            url: `${API_BASE_URL}/disponibilita/${id}`,
             method: 'GET',
             dataType: 'json',
             success: function (disponibilita) {
                 console.log("Disponibilità caricate:", disponibilita);
-
             },
             error: function (err) {
                 console.warn("Impossibile caricare le disponibilità:", err);
@@ -69,56 +69,60 @@ $(document).ready(function () {
     }
 
     /**
-     * Mappa i campi ritornati dalla query SQL negli elementi HTML della pagina
+     * Mappa i campi ritornati dal DB negli elementi HTML della pagina
      */
     function renderServiceData(data) {
-        // Nome e cognome del sitter (corretto nome della variabile)
-        const nomeSitter = `${data.nome || ''} ${data.cognome || ''}`.trim();
+        const serviceId = data.id_servizio || data.id || idServizio;
+
+        // Imposta l'ID servizio nell'input hidden della modale recensioni
+        $('#reviewServizioId').val(serviceId);
+
+        // Nome e cognome del sitter
+        const nomeSitter = `${data.nome || data.nome_professionista || ''} ${data.cognome || data.cognome_professionista || ''}`.trim();
         $("#sitterName").text(nomeSitter || "Pet Sitter");
 
         // Zona/Città
         $("#sitterZone").text(data.zona || "Zona non specificata");
 
-        // Valutazione / Stelle
-        const valutazione = data.media_voto != null
-            ? parseFloat(data.media_voto).toFixed(1)
-            : "Nessuna Valutazione";
-
-        $("#sitterRating").text(valutazione);
-
-        // Numero di recensioni
-        const numRecensioni = data.num_recensioni != null
-            ? data.num_recensioni
-            : (data.recensioni ? data.recensioni.length : 0);
-        $("#reviewsCount").text(`(${numRecensioni} recensioni)`);
-
-        // Tipologia
-        $("#serviceTitle").text(data.tipologia|| "Tipo di Servizio");
+        // Tipologia e Animale
+        const titoloServizio = `${data.tipologia || 'Servizio'} - ${data.tipo_animale || 'Pet'}`;
+        $("#serviceTitle").text(titoloServizio);
 
         // Prezzo / Tariffa
-        const tariffa = parseFloat(data.tariffa ||  0).toFixed(2);
+        const tariffa = parseFloat(data.tariffa || 0).toFixed(2);
         $("#servicePrice").text(`€${tariffa}`);
 
-        // Link per la prenotazione con passaggio dell'ID
-        $("#btnBookNow").attr("href", `prenotazioni.html?id_servizio=${data.id_servizio || data.id}`);
+        // Link per avviare la prenotazione
+        $("#btnBookNow").attr("href", `prenotazione.html?id_servizio=${serviceId}`);
 
-        // Renderizza le recensioni se presenti
-        renderReviews(data.recensioni || []);
-
-        // Nasconde lo spinner e mostra il contenuto
+        // Nasconde lo spinner e mostra il contenitore principale
         $("#loader").addClass("d-none");
         $("#detailContent").removeClass("d-none");
+
+        // --- INTEGRAZIONE CON RECENSIONI.JS ---
+        const idProfessionista = data.id_professionista;
+
+        if (idProfessionista && typeof window.loadReviewsForProfessionist === 'function') {
+            window.loadReviewsForProfessionist(idProfessionista);
+        } else if (data.recensioni) {
+            renderReviews(data.recensioni);
+        }
     }
 
     /**
-     * Inietta la lista delle recensioni dinamiche
+     * Fallback: Inietta la lista delle recensioni se ricevute nel payload del servizio
      */
     function renderReviews(recensioni) {
         const $reviewsList = $("#reviewsList");
         $reviewsList.empty();
 
         if (!recensioni || recensioni.length === 0) {
-            $reviewsList.append('<p class="text-muted mb-0">Nessuna recensione disponibile per questo servizio.</p>');
+            $reviewsList.append(`
+                <div class="dash-card p-4 text-center text-muted">
+                    <i class="bi bi-star-slash fs-1 d-block mb-2 text-secondary"></i>
+                    Nessuna recensione disponibile per questo servizio.
+                </div>
+            `);
             return;
         }
 
@@ -130,18 +134,20 @@ $(document).ready(function () {
                 stelleHTML += `<i class="bi bi-star-fill ${i <= voto ? 'text-warning' : 'text-muted opacity-25'}"></i>`;
             }
 
-            const dataFormattata = rec.data_creazione ? new Date(rec.data_creazione).toLocaleDateString('it-IT') : '';
+            const dataFormattata = rec.data_creazione
+                ? new Date(rec.data_creazione).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })
+                : '';
 
             $reviewsList.append(`
-                <div class="p-3 bg-paper rounded-4 border">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="dash-card p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
-                            <strong class="d-block text-dark">${escapeHtml(rec.nome || 'Utente')}</strong>
-                            <small class="text-muted" style="font-size: 0.8rem;">${escapeHtml(dataFormattata)}</small>
+                            <h5 class="fw-bold mb-0">${escapeHtml(rec.nome || 'Cliente')}</h5>
+                            <small class="text-muted">${escapeHtml(dataFormattata)}</small>
                         </div>
-                        <div>${stelleHTML}</div>
+                        <div class="fs-5">${stelleHTML}</div>
                     </div>
-                    <p class="mb-0 text-secondary small">${escapeHtml(rec.testo || rec.commento)}</p>
+                    <p class="text-secondary mb-0">${escapeHtml(rec.commento || rec.testo || 'Nessun commento scritto.')}</p>
                 </div>
             `);
         });
