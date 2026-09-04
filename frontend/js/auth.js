@@ -1,4 +1,4 @@
-//il token verrà allegato in automatico
+// Il token verrà allegato in automatico a tutte le chiamate AJAX
 $.ajaxSetup({
     beforeSend: function(xhr) {
         const token = localStorage.getItem('token');
@@ -13,8 +13,161 @@ $(document).ready(function () {
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/;
 
     checkAuth();
+    loadUserProfile();
 
-    // Gestione campo Zona dinamico in registrazione
+    // --- CARICAMENTO DATI UTENTE (Sia Riepilogo che Form Modifica) ---
+    function loadUserProfile() {
+        if (!$('#tab-riepilogo').length && !$('#profile-form').length) return;
+
+        $.ajax({
+            url: `${API_URL}/me`,
+            method: 'GET',
+            dataType: 'json',
+            success: function (user) {
+                const ruolo = localStorage.getItem('ruolo');
+
+                // 1. Popolamento Card Riepilogo (Sola lettura)
+                $('#summary-nome').text(user.nome || '—');
+                $('#summary-cognome').text(user.cognome || '—');
+                $('#summary-email').text(user.email || '—');
+
+                if (ruolo === 'professionista') {
+                    $('#summary-zona-box').hide();
+                    $('#profile-zona-container').hide();
+                } else {
+                    $('#summary-zona').text(user.zona || 'Non specificata');
+                    $('#profile-zona-input').val(user.zona || '');
+                }
+
+                // 2. Popolamento Form Modifica Profilo
+                $('#profile-nome-input').val(user.nome || '');
+                $('#profile-cognome-input').val(user.cognome || '');
+                $('#profile-email-input').val(user.email || '');
+            },
+            error: function (xhr) {
+                console.error("Errore nel caricamento del profilo:", xhr);
+            }
+        });
+    }
+
+    // --- MODIFICA PROFILO ---
+    $('#profile-form').on('submit', function (e) {
+        e.preventDefault();
+
+        const $status = $('#profile-status');
+        const $btn = $('#btn-save-profile');
+
+        $status.removeClass('text-success text-danger').text('');
+
+        const payload = {
+            nome: $('#profile-nome-input').val().trim(),
+            cognome: $('#profile-cognome-input').val().trim(),
+            email: $('#profile-email-input').val().trim()
+        };
+
+        const ruolo = localStorage.getItem('ruolo');
+        if (ruolo !== 'professionista') {
+            payload.zona = $('#profile-zona-input').val().trim();
+        }
+
+        if (!payload.nome || !payload.cognome || !payload.email) {
+            $status.addClass('text-danger').text('Compila tutti i campi obbligatori.');
+            return;
+        }
+
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: `${API_URL}/me/edit`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                $status
+                    .removeClass('text-danger')
+                    .addClass('text-success')
+                    .text(response.message || 'Profilo aggiornato con successo!');
+
+                // Aggiorna anche la scheda di riepilogo in tempo reale
+                loadUserProfile();
+            },
+            error: function (xhr) {
+                const errorMsg = xhr.responseJSON?.error || 'Errore durante l\'aggiornamento del profilo.';
+                $status
+                    .removeClass('text-success')
+                    .addClass('text-danger')
+                    .text(errorMsg);
+            },
+            complete: function () {
+                $btn.prop('disabled', false);
+            }
+        });
+    });
+
+    // --- CAMBIO PASSWORD ---
+    $('#update-password-form').on('submit', function (e) {
+        e.preventDefault();
+
+        const vecchiaPassword = $('#old-password').val();
+        const nuovaPassword = $('#new-password').val();
+        const $status = $('#password-status');
+        const $button = $(this).find('button[type="submit"]');
+
+        $status.removeClass('text-success text-danger').text('');
+
+        if (!vecchiaPassword || !nuovaPassword) {
+            $status.addClass('text-danger').text('Compila tutti i campi.');
+            return;
+        }
+
+        if (!passwordRegex.test(nuovaPassword)) {
+            $status
+                .addClass('text-danger')
+                .text('La nuova password deve contenere almeno una maiuscola, un numero e un carattere speciale.');
+            $('#new-password').addClass('is-invalid').focus();
+            return;
+        }
+
+        if (vecchiaPassword === nuovaPassword) {
+            $status.addClass('text-danger').text('La nuova password deve essere diversa da quella attuale.');
+            return;
+        }
+
+        const payload = {
+            vecchia_password: vecchiaPassword,
+            nuova_password: nuovaPassword
+        };
+
+        $button.prop('disabled', true);
+
+        $.ajax({
+            url: `${API_URL}/me/password`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                $status
+                    .removeClass('text-danger')
+                    .addClass('text-success')
+                    .text(response.message || 'Password aggiornata con successo!');
+
+                $('#old-password, #new-password').val('').removeClass('is-invalid');
+            },
+            error: function (xhr) {
+                console.error('Errore cambio password:', xhr);
+                const errorMsg = xhr.responseJSON?.error || 'Errore durante l\'aggiornamento della password.';
+                $status
+                    .removeClass('text-success')
+                    .addClass('text-danger')
+                    .text(errorMsg);
+            },
+            complete: function () {
+                $button.prop('disabled', false);
+            }
+        });
+    });
+
+    // --- REGISTRAZIONE ---
     $('#regRuolo').on('change', function () {
         if ($(this).val() === 'prop') {
             $('#zonaGroup').removeClass('d-none');
@@ -25,7 +178,6 @@ $(document).ready(function () {
         }
     });
 
-    // --- REGISTRAZIONE ---
     $('#registerForm').on('submit', function (e) {
         e.preventDefault();
 
@@ -72,7 +224,6 @@ $(document).ready(function () {
         const email = $('#loginEmail').val().trim();
         const password = $('#loginPassword').val();
 
-
         $('#loginPassword').removeClass('is-invalid');
 
         const payload = { email, password };
@@ -103,7 +254,6 @@ $(document).ready(function () {
         });
     });
 
-    // Rimuove lo stato di errore quando si digita
     $(document).on('input', '#loginPassword, #regPassword', function () {
         $(this).removeClass('is-invalid');
     });
@@ -128,92 +278,6 @@ $(document).ready(function () {
             }
         }
     }
-
-    // --- CAMBIO PASSWORD ---
-    $('#update-password-form').on('submit', function (e) {
-        e.preventDefault();
-
-        const vecchiaPassword = $('#old-password').val();
-        const nuovaPassword = $('#new-password').val();
-        const $status = $('#password-status');
-        const $button = $(this).find('button[type="submit"]');
-
-        // Pulizia messaggio precedente
-        $status.removeClass('text-success text-danger').text('');
-
-        // Controllo campi vuoti
-        if (!vecchiaPassword || !nuovaPassword) {
-            $status
-                .addClass('text-danger')
-                .text('Compila tutti i campi.');
-            return;
-        }
-
-        // Controllo requisiti nuova password
-        if (!passwordRegex.test(nuovaPassword)) {
-            $status
-                .addClass('text-danger')
-                .text('La nuova password deve contenere almeno una maiuscola, un numero e un carattere speciale.');
-
-            $('#new-password').addClass('is-invalid').focus();
-            return;
-        }
-
-        // Controlla che la nuova password sia diversa dalla vecchia
-        if (vecchiaPassword === nuovaPassword) {
-            $status
-                .addClass('text-danger')
-                .text('La nuova password deve essere diversa da quella attuale.');
-            return;
-        }
-
-        const payload = {
-            vecchia_password: vecchiaPassword,
-            nuova_password: nuovaPassword
-        };
-
-        // Disabilita il pulsante durante la richiesta
-        $button.prop('disabled', true);
-
-        $.ajax({
-            url: `${API_URL}/me/password`,
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(payload),
-
-            success: function (response) {
-                $status
-                    .removeClass('text-danger')
-                    .addClass('text-success')
-                    .text(response.message || 'Password aggiornata con successo!');
-
-                // Svuota i campi
-                $('#old-password').val('');
-                $('#new-password').val('');
-
-                // Rimuove eventuali errori grafici
-                $('#old-password, #new-password').removeClass('is-invalid');
-            },
-
-            error: function (xhr) {
-                console.error('Errore cambio password:', xhr);
-
-                const errorMsg =
-                    xhr.responseJSON?.error ||
-                    'Errore durante l\'aggiornamento della password.';
-
-                $status
-                    .removeClass('text-success')
-                    .addClass('text-danger')
-                    .text(errorMsg);
-            },
-
-            complete: function () {
-                // Riabilita il pulsante
-                $button.prop('disabled', false);
-            }
-        });
-    });
 
     // Helper per messaggi alert
     function showAlert(message, type) {

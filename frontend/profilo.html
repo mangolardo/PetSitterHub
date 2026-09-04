@@ -27,9 +27,9 @@
     <nav class="navbar navbar-expand-md">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
-                    <span class="brand-icon">
-                        <i class="bi bi-patch-check-fill"></i>
-                    </span>
+                <span class="brand-icon">
+                    <i class="bi bi-patch-check-fill"></i>
+                </span>
                 <span>PetSitterHub</span>
             </a>
 
@@ -53,8 +53,11 @@
             <!-- SIDEBAR DI NAVIGAZIONE -->
             <div class="col-lg-3">
                 <div class="list-group list-group-custom" id="dashboard-tabs" role="tablist">
-                    <button class="list-group-item list-group-item-action active" id="tab-dati-btn" data-bs-toggle="list" data-bs-target="#tab-dati" type="button">
-                        <i class="bi bi-person-vcard me-2"></i> Dati Account
+                    <button class="list-group-item list-group-item-action active" id="tab-riepilogo-btn" data-bs-toggle="list" data-bs-target="#tab-riepilogo" type="button">
+                        <i class="bi bi-person-vcard me-2"></i> Riepilogo Profilo
+                    </button>
+                    <button class="list-group-item list-group-item-action" id="tab-modifica-profilo-btn" data-bs-toggle="list" data-bs-target="#tab-modifica-profilo" type="button">
+                        <i class="bi bi-pencil-square me-2"></i> Modifica Profilo
                     </button>
                     <button class="list-group-item list-group-item-action" id="tab-servizi-btn" data-bs-toggle="list" data-bs-target="#tab-servizi" type="button">
                         <i class="bi bi-journal-text me-2"></i> Chat
@@ -63,7 +66,7 @@
                         <i class="bi bi-calendar-check me-2"></i> Prenotazioni
                     </button>
                     <button class="list-group-item list-group-item-action" id="tab-password-btn" data-bs-toggle="list" data-bs-target="#tab-password" type="button">
-                        <i class="bi bi-shield-lock me-2"></i> Modifica password
+                        <i class="bi bi-shield-lock me-2"></i> Modifica Password
                     </button>
                 </div>
             </div>
@@ -72,14 +75,47 @@
             <div class="col-lg-9">
                 <div class="tab-content">
 
-                    <!-- TAB 1: DATI ACCOUNT -->
-                    <div class="tab-pane fade show active" id="tab-dati" role="tabpanel">
+                    <!-- TAB 1: RIEPILOGO PROFILO (SOLA LETTURA) -->
+                    <div class="tab-pane fade show active" id="tab-riepilogo" role="tabpanel">
                         <div class="login-card">
                             <div class="mb-4">
-                                    <span class="hero-eyebrow mb-2">
-                                        <i class="bi bi-person-vcard"></i> Dati Account
-                                    </span>
-                                <h2 class="h4 font-weight-bold mt-2">Informazioni Personali</h2>
+                                <span class="hero-eyebrow mb-2">
+                                    <i class="bi bi-person-vcard"></i> Profilo Utente
+                                </span>
+                                <h2 class="h4 font-weight-bold mt-2">Riepilogo Dati Account</h2>
+                            </div>
+
+                            <div class="card border-0 bg-light p-4 rounded-3">
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <small class="text-muted d-block fw-bold mb-1">NOME</small>
+                                        <span id="summary-nome" class="fs-6 text-dark fw-semibold">—</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted d-block fw-bold mb-1">COGNOME</small>
+                                        <span id="summary-cognome" class="fs-6 text-dark fw-semibold">—</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted d-block fw-bold mb-1">INDIRIZZO EMAIL</small>
+                                        <span id="summary-email" class="fs-6 text-dark fw-semibold">—</span>
+                                    </div>
+                                    <div class="col-md-6" id="summary-zona-box">
+                                        <small class="text-muted d-block fw-bold mb-1">ZONA REGISTRATA</small>
+                                        <span id="summary-zona" class="fs-6 text-dark fw-semibold">—</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: MODIFICA PROFILO -->
+                    <div class="tab-pane fade" id="tab-modifica-profilo" role="tabpanel">
+                        <div class="login-card">
+                            <div class="mb-4">
+                                <span class="hero-eyebrow mb-2">
+                                    <i class="bi bi-pencil-square"></i> Gestione Profilo
+                                </span>
+                                <h2 class="h4 font-weight-bold mt-2">Modifica Dati Account</h2>
                             </div>
 
                             <form id="profile-form" novalidate>
@@ -88,14 +124,14 @@
                                         <label for="profile-nome-input" class="form-label fw-semibold">Nome</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                            <input type="text" id="profile-nome-input" class="form-control" readonly>
+                                            <input type="text" id="profile-nome-input" class="form-control" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="profile-cognome-input" class="form-label fw-semibold">Cognome</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                            <input type="text" id="profile-cognome-input" class="form-control" readonly>
+                                            <input type="text" id="profile-cognome-input" class="form-control" required>
                                         </div>
                                     </div>
                                 </div>
@@ -104,30 +140,60 @@
                                     <label for="profile-email-input" class="form-label fw-semibold">Indirizzo Email</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                        <input type="email" id="profile-email-input" class="form-control" readonly>
+                                        <input type="email" id="profile-email-input" class="form-control" required>
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-3" id="profile-zona-container">
                                     <label for="profile-zona-input" class="form-label fw-semibold">Zona Registrata</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                                        <input type="text" id="profile-zona-input" class="form-control" placeholder="Non specificata" readonly>
+                                        <input type="text" id="profile-zona-input" class="form-control" placeholder="Inserisci zona">
                                     </div>
                                 </div>
+
+                                <button type="submit" class="btn btn-coral w-100 py-2 mb-3 mt-2" id="btn-save-profile">
+                                    <i class="bi bi-save me-1"></i> Salva Modifiche Profilo
+                                </button>
+
+                                <p id="profile-status" class="search-status text-center mb-0" aria-live="polite"></p>
                             </form>
                         </div>
                     </div>
 
-                    <!-- TAB 2: MESSAGGI -->
+                    <!-- TAB 3: MESSAGGI / CHAT -->
                     <div class="tab-pane fade" id="tab-servizi" role="tabpanel">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h3 class="h4 fw-bold mb-0">Chat</h3>
                         </div>
-                        <!-- Contenuto messaggi qui -->
+                        <div class="dash-card overflow-hidden">
+                            <div class="row g-0 chat-container" style="min-height: 400px;">
+                                <div class="col-md-4 border-end">
+                                    <div class="list-group list-group-flush" id="lista-conversazioni">
+                                        <div class="p-4 text-center text-muted">Caricamento chat...</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 d-flex flex-column">
+                                    <div class="p-3 border-bottom bg-light fw-bold text-muted" id="chat-header">
+                                        Seleziona una conversazione
+                                    </div>
+                                    <div class="flex-grow-1 p-3 overflow-auto chat-body-scroll" id="chat-body" style="max-height: 350px;">
+                                        <p class="text-muted text-center mt-5">Scegli una conversazione dalla lista a sinistra.</p>
+                                    </div>
+                                    <div class="p-3 border-top bg-white">
+                                        <form id="form-invia-messaggio" class="d-flex gap-2">
+                                            <input type="text" class="form-control rounded-pill" id="input-messaggio" placeholder="Scrivi un messaggio..." disabled required>
+                                            <button type="submit" class="btn btn-coral rounded-circle" id="btn-invia-msg" disabled>
+                                                <i class="bi bi-send-fill"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- TAB 3: PRENOTAZIONI -->
+                    <!-- TAB 4: PRENOTAZIONI -->
                     <div class="tab-pane fade" id="tab-prenotazioni" role="tabpanel">
                         <h3 class="h4 fw-bold mb-3">Prenotazioni</h3>
                         <div class="dash-card p-4">
@@ -152,18 +218,17 @@
                         </div>
                     </div>
 
-                    <!-- TAB 4: MODIFICA PASSWORD -->
+                    <!-- TAB 5: MODIFICA PASSWORD -->
                     <div class="tab-pane fade" id="tab-password" role="tabpanel">
                         <div class="login-card">
                             <div class="mb-4">
-                                    <span class="hero-eyebrow mb-2">
-                                        <i class="bi bi-shield-lock"></i> Sicurezza
-                                    </span>
+                                <span class="hero-eyebrow mb-2">
+                                    <i class="bi bi-shield-lock"></i> Sicurezza
+                                </span>
                                 <h2 class="h4 font-weight-bold mt-2">Aggiorna Password</h2>
                             </div>
 
                             <form id="update-password-form" novalidate>
-                                <!-- Vecchia Password -->
                                 <div class="mb-3">
                                     <label for="old-password" class="form-label fw-semibold">Password Attuale</label>
                                     <div class="input-group">
@@ -175,7 +240,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Nuova Password -->
                                 <div class="mb-4">
                                     <label for="new-password" class="form-label fw-semibold">Nuova Password</label>
                                     <div class="input-group">
@@ -187,12 +251,10 @@
                                     </div>
                                 </div>
 
-                                <!-- Bottone Salva -->
                                 <button type="submit" class="btn btn-coral w-100 py-2 mb-3">
                                     <i class="bi bi-save me-1"></i> Cambia Password
                                 </button>
 
-                                <!-- Messaggio di esito -->
                                 <p id="password-status" class="search-status text-center mb-0" aria-live="polite"></p>
                             </form>
                         </div>
@@ -219,7 +281,7 @@
 
 <!-- Logica AJAX -->
 <script src="js/auth.js"></script>
-
+<script src="js/messaggi.js"></script>
 <!-- Script UI -->
 <script>
     $(document).ready(function () {
