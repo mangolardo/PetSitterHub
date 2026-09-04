@@ -54,7 +54,7 @@ const queries = require('../../../database/queries');
             }
             if (userResult.rows.length === 0) {
                 return res.status(401).json({error: 'Credenziali non valide'})
-            };
+            }
 
             const user = userResult.rows[0];
 
@@ -63,8 +63,6 @@ const queries = require('../../../database/queries');
             if (!validPassword) {
                 return res.status(401).json({error: 'Credenziali non valide'});
             }
-            //test
-console.log(user)
             // genera il token
             const token = jwt.sign(
                 {id: user.id, ruolo: ruolo},
