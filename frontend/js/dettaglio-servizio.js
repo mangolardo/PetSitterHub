@@ -1,12 +1,13 @@
-const API_BASE_URL = require('./config.js')
 $(document).ready(function () {
     // Previene attacchi XSS
     function escapeHtml(text) {
         return $('<div>').text(text || '').html();
     }
 
-    // Configura la base URL delle API Express (assicurati che sia definita in config.js)
-   // const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : '';
+    // Gestione dinamica dell'URL API senza require()
+    const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL)
+        ? CONFIG.API_BASE_URL
+        : (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '');
 
     // Recupera l'ID del servizio dall'URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -34,11 +35,10 @@ $(document).ready(function () {
 
     /**
      * 1. CARICAMENTO DETTAGLI SERVIZIO
-     * Chiamata GET /api/servizi/:id_service
      */
     function loadServiceDetails(id) {
         $.ajax({
-            url: `${API_BASE_URL}/services/${id}`,
+            url: `${baseUrl}/services/${id}`,
             method: 'GET',
             dataType: 'json',
             success: function (servizio) {
@@ -64,12 +64,17 @@ $(document).ready(function () {
     function renderServiceData(data) {
         const serviceId = data.id || data.id_servizio || idServizio;
 
-        // Imposta l'ID servizio nell'input hidden
-        $('#reviewServizioId').val(serviceId);
+        // Estrazione singola e sicura dell'ID del professionista
+        const idProfessionista = data.id_professionista || data.id_sitter;
 
         // Nome e cognome del sitter
         const nomeSitter = `${data.nome || data.nome_professionista || ''} ${data.cognome || data.cognome_professionista || ''}`.trim();
         $("#sitterName").text(nomeSitter || "Pet Sitter");
+
+        // Imposta il link alla pagina del profilo pubblico del pet sitter
+        if (idProfessionista) {
+            $("#sitterProfileLink").attr("href", `profilo-sitter.html?id=${idProfessionista}`);
+        }
 
         // Zona/Città
         $("#sitterZone").text(data.zona || "Zona non specificata");
@@ -90,8 +95,6 @@ $(document).ready(function () {
         $("#detailContent").removeClass("d-none");
 
         // CARICAMENTO RECENSIONI
-        // Recupera le recensioni usando id_professionista se presente
-        const idProfessionista = data.id_professionista;
         if (idProfessionista) {
             loadReviews(idProfessionista);
         } else {
@@ -101,11 +104,10 @@ $(document).ready(function () {
 
     /**
      * 3. CARICAMENTO RECENSIONI
-     * Chiamata GET /api/recensioni/:id_professionista
      */
     function loadReviews(idProfessionista) {
         $.ajax({
-            url: `${API_BASE_URL}/recensioni/${idProfessionista}`,
+            url: `${baseUrl}/recensioni/${idProfessionista}`,
             method: 'GET',
             dataType: 'json',
             success: function (recensioni) {
@@ -120,7 +122,7 @@ $(document).ready(function () {
     }
 
     /**
-     * Calcola e mostra la media voti e il conteggio recensioni nell'intestazione
+     * Calcola e mostra la media voti e il conteggio recensioni
      */
     function updateRatingSummary(recensioni) {
         if (!recensioni || recensioni.length === 0) {
@@ -153,7 +155,6 @@ $(document).ready(function () {
             return;
         }
 
-        // Legge l'ID dell'utente corrente memorizzato al login (es. in localStorage) per consentire l'eliminazione
         const currentUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
 
         recensioni.forEach(function (rec) {
@@ -170,7 +171,6 @@ $(document).ready(function () {
 
             const nomeAutore = `${rec.nome || 'Cliente'} ${rec.cognome || ''}`.trim();
 
-            // Tasto elimina: mostrato se la recensione appartiene all'utente attualmente loggato
             let deleteBtnHTML = '';
             if (currentUserId && (rec.id_proprietario == currentUserId || rec.id_utente == currentUserId)) {
                 deleteBtnHTML = `
@@ -196,7 +196,6 @@ $(document).ready(function () {
             `);
         });
 
-        // Event listener per i pulsanti di eliminazione
         $(".btn-delete-review").off('click').on('click', function () {
             const idRecensione = $(this).data('id');
             if (confirm("Sei sicuro di voler eliminare questa recensione?")) {
@@ -207,7 +206,6 @@ $(document).ready(function () {
 
     /**
      * 5. CREAZIONE RECENSIONE
-     * Chiamata POST /api/recensioni/add
      */
     function setupReviewFormSubmit() {
         $("#addReviewForm").on("submit", function (e) {
@@ -232,7 +230,7 @@ $(document).ready(function () {
             $btnSubmit.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Invio in corso...');
 
             $.ajax({
-                url: `${API_BASE_URL}/recensioni/add`,
+                url: `${baseUrl}/recensioni/add`,
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -246,12 +244,10 @@ $(document).ready(function () {
                 success: function (response) {
                     showAlert('success', 'Recensione pubblicata con successo!');
 
-                    // Resetta il form
                     $("#addReviewForm")[0].reset();
                     $("#reviewValutazione").val(0);
                     resetStars();
 
-                    // Chiudi il modale dopo 1.5 secondi e ricarica i dati
                     setTimeout(() => {
                         const modal = bootstrap.Modal.getInstance(document.getElementById('addReviewModal'));
                         if (modal) modal.hide();
@@ -276,7 +272,6 @@ $(document).ready(function () {
 
     /**
      * 6. ELIMINAZIONE RECENSIONE
-     * Chiamata DELETE /api/recensioni/delete/:id
      */
     function deleteReview(idRecensione) {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -286,14 +281,13 @@ $(document).ready(function () {
         }
 
         $.ajax({
-            url: `${API_BASE_URL}/recensioni/delete/${idRecensione}`,
+            url: `${baseUrl}/recensioni/delete/${idRecensione}`,
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
             },
             success: function (response) {
                 alert("Recensione eliminata con successo.");
-                // Ricarica la pagina o i dettagli per aggiornare la lista e la media
                 loadServiceDetails(idServizio);
             },
             error: function (xhr) {
@@ -348,7 +342,7 @@ $(document).ready(function () {
     function showAlert(type, message) {
         const $alert = $("#reviewAlert");
         $alert.removeClass("d-none alert-success alert-danger alert-warning")
-              .addClass(`alert-${type}`)
-              .text(message);
+            .addClass(`alert-${type}`)
+            .text(message);
     }
 });
