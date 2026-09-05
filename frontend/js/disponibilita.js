@@ -1,6 +1,7 @@
 //const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : 'http://localhost:3000/api';
 let calendarInstance = null;
 let modalCalendarInstance = null;
+let eventoSelezionato = null; // Memorizza l'evento selezionato nel calendario
 
 $(document).ready(async function () {
     const urlParams = new URLSearchParams(window.location.search);
@@ -33,6 +34,9 @@ $(document).ready(async function () {
 
     // Gestione invio form creazione nuova disponibilità
     $('#form-crea-disponibilita').on('submit', handleAddAvailability);
+
+    // Gestione eliminazione dalla modale di dettaglio
+    $('#btn-elimina-disponibilita').on('click', handleEliminaDaModale);
 
     // Gestione apertura modale gestione disponibilità da singola riga servizio
     $('#modalDisponibilita').on('shown.bs.modal', function () {
@@ -76,13 +80,40 @@ async function loadSitterServicesForSelect(id) {
 }
 
 /**
+ * Apre la modale con i dettagli della disponibilità anziché eliminarla subito.
+ */
+function showDetailModal(event) {
+    eventoSelezionato = event;
+
+    const opzioniData = {
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+
+    const inizioStr = event.start ? event.start.toLocaleDateString('it-IT', opzioniData) : 'N/D';
+    const fineStr = event.end ? event.end.toLocaleDateString('it-IT', opzioniData) : 'N/D';
+
+    $('#dettaglio-disp-id').val(event.id);
+    $('#dettaglio-disp-servizio').text(event.title || 'Servizio Generico');
+    $('#dettaglio-disp-inizio').text(inizioStr);
+    $('#dettaglio-disp-fine').text(fineStr);
+
+    const modalEl = document.getElementById('modalDettaglioDisponibilita');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+}
+
+/**
  * Inizializza il calendario principale nella tab Disponibilità.
  */
 function initMainCalendar(id) {
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) return;
 
-    // Popola le opzioni della select dei servizi nel modale se l'ID è valido
     if (id) {
         loadSitterServicesForSelect(id);
     }
@@ -98,17 +129,15 @@ function initMainCalendar(id) {
         selectable: true,
         selectMirror: true,
 
-        // Selezione/Trascrizione di date per creare un nuovo slot
         select: function (info) {
             openCreateModal(info.startStr, info.endStr);
         },
 
-        // Click su uno slot esistente per eliminarlo
+        // MODIFICATO: Apre la modale di dettaglio anziché deleteAvailability()
         eventClick: function (info) {
-            deleteAvailability(info.event.id);
+            showDetailModal(info.event);
         },
 
-        // Caricamento eventi interrogando l'endpoint /services/:id del professionista
         events: async function (fetchInfo, successCallback, failureCallback) {
             try {
                 const token = localStorage.getItem('token');
@@ -118,7 +147,6 @@ function initMainCalendar(id) {
                     return;
                 }
 
-                // 1. Recupera i servizi del professionista tramite l'endpoint corretto
                 const resServizi = await fetch(`${API_BASE_URL}/services/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -131,7 +159,6 @@ function initMainCalendar(id) {
                 const servizi = await resServizi.json();
                 let allEvents = [];
 
-                // 2. Per ciascun servizio recupera le relative disponibilità
                 for (const serv of servizi) {
                     const resDisp = await fetch(`${API_BASE_URL}/availabilities/${serv.id}`);
                     if (resDisp.ok) {
@@ -158,6 +185,26 @@ function initMainCalendar(id) {
     });
 
     calendarInstance.render();
+}
+
+/**
+ * Gestisce l'evento di click sul pulsante "Elimina Disponibilità" nella modale di dettaglio.
+ */
+async function handleEliminaDaModale() {
+    if (!eventoSelezionato) return;
+
+    const dispId = eventoSelezionato.id || $('#dettaglio-disp-id').val();
+
+    const esito = await deleteAvailability(dispId);
+
+    if (esito) {
+        // Chiude la modale di dettaglio in caso di successo
+        const modalEl = document.getElementById('modalDettaglioDisponibilita');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        eventoSelezionato = null;
+    }
 }
 
 /**
@@ -240,10 +287,11 @@ async function handleAddAvailability(e) {
 
 /**
  * Cancella uno slot di disponibilità previa conferma dell'utente.
+ * Ritorna true se completata con successo, false altrimenti.
  */
 async function deleteAvailability(idDisponibilita) {
     if (!confirm('Sei sicuro di voler rimuovere questa disponibilità?')) {
-        return;
+        return false;
     }
 
     try {
@@ -269,9 +317,11 @@ async function deleteAvailability(idDisponibilita) {
         }
 
         showAlert('Disponibilità rimossa con successo.', 'info');
+        return true;
     } catch (error) {
         console.error('Errore deleteAvailability:', error);
         alert(error.message);
+        return false;
     }
 }
 
@@ -304,8 +354,9 @@ function openModalForService(idServizio, titoloServizio) {
             $('#disp-servizio-select').val(idServizio);
             openCreateModal(info.startStr, info.endStr);
         },
+        // MODIFICATO: Apre la modale di dettaglio anche dal calendario interno al modale servizio
         eventClick: function (info) {
-            deleteAvailability(info.event.id);
+            showDetailModal(info.event);
         },
         events: async function (fetchInfo, successCallback, failureCallback) {
             try {
@@ -315,7 +366,7 @@ function openModalForService(idServizio, titoloServizio) {
                 const dispList = await response.json();
                 const events = dispList.map(item => ({
                     id: item.id,
-                    title: 'Disponibile',
+                    title: titoloServizio || 'Disponibile',
                     start: item.data_inizio,
                     end: item.data_fine,
                     backgroundColor: '#20c997',
