@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PetSitterHub - Dettagli del servizio e recensioni dei clienti.">
+    <title>PetSitterHub — Dettaglio Servizio</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSS personalizzato -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+<!-- HEADER -->
+<header class="site-header sticky-top">
+    <nav class="navbar navbar-expand-md">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+                <span class="brand-icon">
+                    <i class="bi bi-patch-check-fill"></i>
+                </span>
+                <span>PetSitterHub</span>
+            </a>
+
+            <div class="ms-auto">
+                <a href="catalogo.html" class="btn btn-outline-green rounded-pill px-4">
+                    <i class="bi bi-arrow-left me-1"></i> Torna al Catalogo
+                </a>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- MAIN CONTENT -->
+<main class="flex-grow-1 py-5">
+    <div class="container">
+
+        <!-- Spinner di caricamento -->
+        <div id="loader" class="text-center py-5">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Caricamento...</span>
+            </div>
+            <p class="text-muted mt-2">Caricamento dettagli servizio...</p>
+        </div>
+
+        <!-- Contenuto dinamico (Nascosto finché i dati non sono pronti) -->
+        <div id="detailContent" class="d-none">
+
+            <!-- INTESTAZIONE PET SITTER -->
+            <div class="dash-card p-4 mb-4">
+                <div class="row align-items-center g-3">
+                    <div class="col-auto">
+                        <div class="brand-icon fs-2" style="width: 70px; height: 70px;">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <a href="#" id="sitterProfileLink" class="text-decoration-none color-green text-dark-hover">
+                                <h1 class="h3 font-weight-bold mb-0 d-inline" id="sitterName">Caricamento...</h1>
+                            </a>
+                            <span class="verified-badge">
+                                <i class="bi bi-shield-check"></i> Verificato
+                            </span>
+                        </div>
+                        <p class="zone text-muted mb-1 mt-1">
+                            <i class="bi bi-geo-alt color-green me-1"></i><span id="sitterZone">-</span>
+                        </p>
+                    </div>
+                    <div class="col-auto text-end">
+                        <div class="rating d-inline-block px-3 py-2">
+                            <i class="bi bi-star-fill text-warning me-1 fs-5"></i>
+                            <strong class="fs-5" id="sitterRating">-</strong>
+                            <span class="text-muted small ms-1" id="reviewsCount">(0 recensioni)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRIGLIA PRINCIPALE (2 Colonne) -->
+            <div class="row g-4">
+
+                <!-- COLONNA SINISTRA: Titolo, Descrizione e Recensioni -->
+                <div class="col-12 col-lg-8">
+                    <!-- Box Titolo e Descrizione -->
+                    <div class="dash-card p-4 mb-4">
+                        <h2 class="h4 font-weight-bold mb-3" id="serviceTitle">Titolo Servizio</h2>
+                    </div>
+
+                    <!-- Box Recensioni -->
+                    <div class="dash-card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="h5 font-weight-bold mb-0">Recensioni dei Clienti</h3>
+                            <!-- TASTO PER APRIRE LA MODALE DI RECENSIONE -->
+                            <button type="button" class="btn btn-sm btn-outline-green rounded-pill" data-bs-toggle="modal" data-bs-target="#addReviewModal">
+                                <i class="bi bi-pencil-square me-1"></i> Scrivi una recensione
+                            </button>
+                        </div>
+                        <div id="reviewsList" class="d-flex flex-column gap-3">
+                            <!-- Le recensioni verranno iniettate qui da JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLONNA DESTRA: Box Prenotazione e Tariffa -->
+                <div class="col-12 col-lg-4">
+                    <div class="dash-card p-4 sticky-lg-top" style="top: 100px;">
+                        <span class="text-muted d-block small">Tariffa oraria</span>
+                        <div class="d-flex align-items-baseline gap-1 mb-3">
+                            <strong class="color-green fs-2" id="servicePrice">€0.00</strong>
+                        </div>
+
+                        <hr style="border-color: var(--border);">
+
+                        <a id="btnBookNow" href="#" class="btn btn-coral w-100 py-3 rounded-pill fs-5 font-weight-bold shadow-sm">
+                            <i class="bi bi-calendar-check me-2"></i> Prenota Servizio
+                        </a>
+                    </div>
+                </div>
+
+            </div> <!-- Fine row -->
+
+        </div> <!-- Fine detailContent -->
+
+    </div> <!-- Fine container -->
+</main>
+
+<!-- MODALE AGGIUNGI RECENSIONE -->
+<div class="modal fade" id="addReviewModal" tabindex="-1" aria-labelledby="addReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="addReviewModalLabel">Lascia una Recensione</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="reviewAlert" class="alert d-none" role="alert"></div>
+
+                <form id="addReviewForm">
+                    <!-- Hidden field per passare l'ID servizio -->
+                    <input type="hidden" id="reviewServizioId" name="id_servizio">
+                    <input type="hidden" id="reviewValutazione" name="valutazione" value="0">
+
+                    <!-- Selezione Stelle -->
+                    <div class="mb-3 text-center">
+                        <label class="form-label d-block text-muted small fw-bold">VALUTAZIONE</label>
+                        <div id="starContainer" class="fs-2 text-warning">
+                            <i class="bi bi-star star-btn" data-value="1" style="cursor: pointer;"></i>
+                            <i class="bi bi-star star-btn" data-value="2" style="cursor: pointer;"></i>
+                            <i class="bi bi-star star-btn" data-value="3" style="cursor: pointer;"></i>
+                            <i class="bi bi-star star-btn" data-value="4" style="cursor: pointer;"></i>
+                            <i class="bi bi-star star-btn" data-value="5" style="cursor: pointer;"></i>
+                        </div>
+                    </div>
+
+                    <!-- Commento -->
+                    <div class="mb-3">
+                        <label for="reviewCommento" class="form-label fw-semibold">Il tuo Commento</label>
+                        <textarea class="form-control rounded-3" id="reviewCommento" rows="4" placeholder="Racconta la tua esperienza con questo servizio..." required></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" id="btnSubmitReview" class="btn btn-green rounded-pill py-2 font-weight-bold">
+                            Pubblica Recensione
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer mt-auto">
+    <div class="container text-center">
+        <p class="mb-0">© 2026 PetSitterHub. Tutti i diritti riservati.</p>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/dettaglio-servizio.js"></script>
+</body>
+</html>
