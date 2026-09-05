@@ -2,7 +2,7 @@
 $(document).ready(function () {
     const token = localStorage.getItem('token');
  //   let API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : 'http://localhost:3000/api';
-    const API_MSG = `${API_BASE_URL}/messages/`
+    const API_MSG = `${API_BASE_URL}/messages`
     if (!token) return;
 
     $.ajaxSetup({
@@ -68,7 +68,7 @@ $(document).ready(function () {
     // 2. AVVIA NUOVA CONVERSAZIONE (SE GIUNTO DA LINK ESTERNO)
     function initiateConversation(idDestinatario) {
         $.ajax({
-            url: API_MSG,
+            url: `${API_MSG}/`,
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ id_destinatario: parseInt(idDestinatario) }),
