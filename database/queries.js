@@ -72,5 +72,6 @@ FROM pagamento PAY JOIN prenotazione P ON PAY.id_prenotazione = P.id  JOIN dispo
     CHECK_CONVERSATION_ACCESS: `  SELECT id FROM conversazione    WHERE id = $1 AND (id_proprietario = $2 OR id_professionista = $2)  `,
     GET_MESSAGES: `   SELECT id, id_mittente, tipo_mittente, testo, data_invio  FROM messaggio  WHERE id_conversazione = $1   ORDER BY data_invio `,
     INSERT_MESSAGE: ` INSERT INTO messaggio (id_conversazione, id_mittente, tipo_mittente, testo)  VALUES ($1, $2, $3, $4)  RETURNING id, id_mittente, tipo_mittente, testo, data_invio `,
-    DELETE_MESSAGE: `  DELETE FROM messaggio    WHERE id = $1     AND id_mittente = $2   AND tipo_mittente = $3  RETURNING id `
+    DELETE_MESSAGE: `  DELETE FROM messaggio    WHERE id = $1     AND id_mittente = $2   AND tipo_mittente = $3  RETURNING id `,
+    GET_RECENSIONI_SERVIZIO: 'SELECT  r.id,  r.valutazione, r.commento,  r.data_creazione,p.nome AS nome_proprietario, p.cognome AS cognome_proprietario, s.tipologia AS tipo_servizio  FROM recensione r  JOIN proprietari p ON r.id_proprietario = p.id JOIN servizio s ON r.id_servizio = s.id WHERE s.id= $1 ORDER BY r.data_creazione DESC  '
 };

@@ -69,3 +69,15 @@ exports.deleteReview = async (req, res) => {
         res.status(500).json({ error: 'Errore durante la cancellazione della recensione' });
     }
 };
+
+exports.getServiceReviews = async (req, res) => {
+    try {
+        const idServizio = req.params.id_service;
+        const { rows } = await db.query(queries.GET_RECENSIONI_SERVIZIO, [idServizio]);
+
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error('Errore getRecensioni:', error);
+        res.status(500).json({ error: 'Errore durante il recupero delle recensioni' });
+    }
+};

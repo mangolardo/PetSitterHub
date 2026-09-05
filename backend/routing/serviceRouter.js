@@ -6,9 +6,9 @@ const verifyToken = require('./authMiddleware')
 const serviceHandler = require("./handlers/serviceHandler");
 
 
-router.get('/:id/services', serviceHandler.services)
-router.post('/services', verifyToken, serviceHandler.addService)
-router.delete('/services/:id', verifyToken, serviceHandler.deleteService);
-router.get('/:id_service',servicesHandler.getService)
+router.get('/:id', serviceHandler.services)
+router.post('/', verifyToken, serviceHandler.addService)
+router.delete('/:id', verifyToken, serviceHandler.deleteService);
+router.get('/service/:id_service',servicesHandler.getService)
 
 module.exports = router;
