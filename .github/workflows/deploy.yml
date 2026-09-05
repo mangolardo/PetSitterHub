@@ -3,11 +3,11 @@ name: Deploy PetSitterHub su Google Cloud Run
 # La pipeline si avvia in due modi:
 # 1. In automatico ad ogni "push" sul branch principale (main)
 # 2. Manualmente tramite il pulsante "Run workflow" di GitHub (workflow_dispatch)
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+#on:
+#  push:
+#    branches:
+#      - main
+#  workflow_dispatch:
 
 # Variabili d'ambiente da personalizzare con i dati del tuo progetto GCP
 env:
