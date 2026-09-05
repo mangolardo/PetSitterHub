@@ -1,12 +1,30 @@
-const API_BASE_URL = require('./config.js')
+//const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : 'http://localhost:3000/api';
 let calendarInstance = null;
 let modalCalendarInstance = null;
 
-$(document).ready(function () {
+$(document).ready(async function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    let sitterId = urlParams.get('id_professionista');
+
+    // Se non è specificato nell'URL, recupera l'ID del professionista loggato tramite /auth/me
+    if (!sitterId) {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await $.ajax({
+                url: `${API_BASE_URL}/auth/me`,
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            sitterId = response.id;
+        } catch (err) {
+            console.error('Errore nel recupero dell\'utente corrente:', err);
+        }
+    }
+
     // Inizializza il calendario principale quando viene mostrata la tab "Disponibilità"
     $('#tab-calendario-btn').on('shown.bs.tab', function () {
         if (!calendarInstance) {
-            initMainCalendar();
+            initMainCalendar(sitterId);
         } else {
             calendarInstance.render();
             calendarInstance.refetchEvents();
@@ -26,13 +44,13 @@ $(document).ready(function () {
 });
 
 /**
- * Recupera l'elenco dei servizi del professionista loggato
- * e popolamento della Select nel modale di creazione.
+ * Recupera l'elenco dei servizi del professionista interrogando /services/:id
+ * e popola la Select nel modale di creazione.
  */
-async function loadSitterServicesForSelect() {
+async function loadSitterServicesForSelect(id) {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/services`, {
+        const response = await fetch(`${API_BASE_URL}/services/${id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -47,7 +65,7 @@ async function loadSitterServicesForSelect() {
 
         servizi.forEach(servizio => {
             $select.append(`
-                <option value="${servizio.id}/services">
+                <option value="${servizio.id}">
                     ${servizio.tipologia} - ${servizio.tipo_animale} (${servizio.zona})
                 </option>
             `);
@@ -60,12 +78,14 @@ async function loadSitterServicesForSelect() {
 /**
  * Inizializza il calendario principale nella tab Disponibilità.
  */
-function initMainCalendar() {
+function initMainCalendar(id) {
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) return;
 
-    // Popola le opzioni della select dei servizi nel modale
-    loadSitterServicesForSelect();
+    // Popola le opzioni della select dei servizi nel modale se l'ID è valido
+    if (id) {
+        loadSitterServicesForSelect(id);
+    }
 
     calendarInstance = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
@@ -78,7 +98,7 @@ function initMainCalendar() {
         selectable: true,
         selectMirror: true,
 
-        // Selezione/Trasccinamento di date per creare un nuovo slot
+        // Selezione/Trascrizione di date per creare un nuovo slot
         select: function (info) {
             openCreateModal(info.startStr, info.endStr);
         },
@@ -88,13 +108,18 @@ function initMainCalendar() {
             deleteAvailability(info.event.id);
         },
 
-        // Caricamento eventi da tutti i servizi del professionista
+        // Caricamento eventi interrogando l'endpoint /services/:id del professionista
         events: async function (fetchInfo, successCallback, failureCallback) {
             try {
                 const token = localStorage.getItem('token');
 
-                // 1. Recupera i servizi del professionista
-                const resServizi = await fetch(`${API_BASE_URL}/services`, {
+                if (!id) {
+                    successCallback([]);
+                    return;
+                }
+
+                // 1. Recupera i servizi del professionista tramite l'endpoint corretto
+                const resServizi = await fetch(`${API_BASE_URL}/services/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -139,7 +164,6 @@ function initMainCalendar() {
  * Apre il modale per la creazione di un nuovo slot impostando le date pre-selezionate.
  */
 function openCreateModal(startIso, endIso) {
-    // Adatta il formato ISO a 'YYYY-MM-THH:mm' per l'input datetime-local
     const formatForInput = (isoStr) => {
         if (!isoStr) return '';
         const d = new Date(isoStr);
@@ -195,13 +219,11 @@ async function handleAddAvailability(e) {
             throw new Error(data.error || 'Errore durante l\'aggiunta della disponibilità.');
         }
 
-        // Chiudi il modale e resetta il form
         const modalEl = document.getElementById('modalCreaDisponibilita');
         const modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
         $('#form-crea-disponibilita')[0].reset();
 
-        // Ricarica gli eventi sul calendario
         if (calendarInstance) {
             calendarInstance.refetchEvents();
         }
@@ -239,7 +261,6 @@ async function deleteAvailability(idDisponibilita) {
             throw new Error(data.error || 'Errore durante l\'eliminazione della disponibilità.');
         }
 
-        // Aggiorna il calendario
         if (calendarInstance) {
             calendarInstance.refetchEvents();
         }
@@ -255,8 +276,7 @@ async function deleteAvailability(idDisponibilita) {
 }
 
 /**
- * Funzione di utilità per inizializzare il calendario all'interno del modale dedicato al singolo servizio (`#modalDisponibilita`).
- * Può essere richiamata dalla gestione della tabella dei servizi.
+ * Funzione di utilità per inizializzare il calendario all'interno del modale dedicato al singolo servizio.
  */
 function openModalForService(idServizio, titoloServizio) {
     $('#disp-servizio-id').val(idServizio);

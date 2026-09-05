@@ -1,4 +1,4 @@
-const API_BASE_URL = require('./config.js')
+//const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : 'http://localhost:3000/api';
 $(document).ready(function () {
     // Carica le prenotazioni all'avvio o quando l'utente clicca sulla scheda Prenotazioni
     caricaPrenotazioni();

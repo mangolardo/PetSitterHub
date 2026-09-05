@@ -4,18 +4,17 @@ const cors = require('cors');
 const db = require("../database/config");
 const queries = require("../database/queries");
 require('dotenv').config(); // Carica le variabili d'ambiente (es. connessione al database)
-
-
+const {join} = require("node:path");
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-
-
 //Router generale
- const routes = require('./routing/router.js');
- app.use('/api', routes);
+const routes = require('./routing/router.js');
+
+app.use('/api', routes);
+app.use(express.static(join(__dirname, '../frontend')));
 
 //Avvio del Server
 //Cloud Run inietta automaticamente la variabile d'ambiente PORT. Fallback porta 3000 locale.

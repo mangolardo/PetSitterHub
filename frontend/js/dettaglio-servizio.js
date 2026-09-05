@@ -1,4 +1,4 @@
-const API_BASE_URL = require('./config.js')
+//const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : 'http://localhost:3000/api';
 $(document).ready(function () {
     // Previene attacchi XSS
     function escapeHtml(text) {
@@ -39,7 +39,7 @@ $(document).ready(function () {
      */
     function loadServiceDetails(id) {
         $.ajax({
-            url: `${API_BASE_URL}/services/${id}`,
+            url: `${API_BASE_URL}/services/service/${id}`,
             method: 'GET',
             dataType: 'json',
             success: function (servizio) {

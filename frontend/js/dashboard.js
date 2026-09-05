@@ -1,4 +1,4 @@
-const API_BASE_URL = require('./config.js')
+//const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : 'http://localhost:3000/api';
 $(document).ready(function () {
     const SITTERS_API = `${API_BASE_URL}/sitters`;
     const REVIEWS_API = `${API_BASE_URL}/reviews`;
@@ -68,7 +68,7 @@ $(document).ready(function () {
                     }
 
                     recensioni.forEach(function (rev) {
-                        const stelleHtml = renderStars(rev.voto || rev.stelle || 0);
+                        const stelleHtml = renderStars(rev.valutazione || rev.stelle || 0);
                         const dataFormattata = rev.data_creazione
                             ? new Date(rev.data_creazione).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })
                             : '';
@@ -112,7 +112,7 @@ $(document).ready(function () {
     // --- CARICAMENTO SERVIZI NELLA TABELLA ---
     function loadMyServices(sitterId) {
         $.ajax({
-            url: `${SITTERS_API}/${sitterId}/services`,
+            url: `${API_BASE_URL}/services/${sitterId}`,
             method: 'GET',
             success: function (servizi) {
                 const $tbody = $('#lista-servizi');
@@ -147,7 +147,7 @@ $(document).ready(function () {
         });
     }
 
-    // --- CREAZIONE NUOVO SERVIZIO (POST /api/sitters/services) ---
+    // --- CREAZIONE NUOVO SERVIZIO (POST /api/services) ---
     $('#form-nuovo-servizio').on('submit', function (e) {
         e.preventDefault();
 
@@ -159,7 +159,7 @@ $(document).ready(function () {
         };
 
         $.ajax({
-            url: `${SITTERS_API}/services`,
+            url: `${API_BASE_URL}/services/`,
             method: 'POST',
             contentType: 'application/json',
             //headers: { 'Authorization': `Bearer ${token}` },
@@ -186,7 +186,7 @@ $(document).ready(function () {
         if (!confirm('Sei sicuro di voler eliminare questo servizio?')) return;
 
         $.ajax({
-            url: `${SITTERS_API}/services/${idServizio}`,
+            url: `${API_BASE_URL}/services/${idServizio}`,
             method: 'DELETE',
             //headers: { 'Authorization': `Bearer ${token}` },
             success: function (response) {

@@ -1,4 +1,5 @@
-const API_BASE_URL = require('./config.js')
+// Sostituisci la riga "const API_BASE_URL = require..." con questa:
+const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : 'http://localhost:3000/api';
 // Il token verrà allegato in automatico a tutte le chiamate AJAX
 $.ajaxSetup({
     beforeSend: function(xhr) {

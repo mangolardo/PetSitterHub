@@ -1,7 +1,8 @@
+
 $(document).ready(function () {
     const token = localStorage.getItem('token');
-    let API_BASE_URL = require('./config.js')
-    API_BASE_URL = `${API_BASE_URL}/messages/`
+ //   let API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : 'http://localhost:3000/api';
+    const API_MSG = `${API_BASE_URL}/messages/`
     if (!token) return;
 
     $.ajaxSetup({
@@ -24,7 +25,7 @@ $(document).ready(function () {
     // 1. CARICA LA LISTA DELLE CONVERSAZIONI
     function loadConversations() {
         $.ajax({
-            url: API_BASE_URL,
+            url: API_MSG,
             method: 'GET',
             dataType: 'json',
             success: function (conversations) {
@@ -67,7 +68,7 @@ $(document).ready(function () {
     // 2. AVVIA NUOVA CONVERSAZIONE (SE GIUNTO DA LINK ESTERNO)
     function initiateConversation(idDestinatario) {
         $.ajax({
-            url: API_BASE_URL,
+            url: API_MSG,
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ id_destinatario: parseInt(idDestinatario) }),
@@ -104,7 +105,7 @@ $(document).ready(function () {
         $('#input-messaggio, #btn-invia-msg').prop('disabled', false);
 
         $.ajax({
-            url: `${API_BASE_URL}/${idConversazione}`,
+            url: `${API_MSG}/${idConversazione}`,
             method: 'GET',
             dataType: 'json',
             success: function (messages) {
@@ -166,7 +167,7 @@ $(document).ready(function () {
         if (!testo) return;
 
         $.ajax({
-            url: `${API_BASE_URL}/${activeConversationId}`,
+            url: `${API_MSG}/${activeConversationId}`,
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ testo: testo }),
@@ -189,7 +190,7 @@ $(document).ready(function () {
         if (!confirm('Eliminare questo messaggio?')) return;
 
         $.ajax({
-            url: `${API_BASE_URL}/message/${idMessaggio}`,
+            url: `${API_MSG}/message/${idMessaggio}`,
             method: 'DELETE',
             success: function () {
                 loadMessages(activeConversationId);

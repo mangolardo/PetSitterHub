@@ -81,16 +81,19 @@ const queries = require('../../../database/queries');
     exports.getMe = async (req, res) => {
         try {
             // req.user viene popolato dal middleware che verifica il token
-
-            let userResult = await db.query(
-                queries.FIND_PROP_ID,
-                [req.user.id]
-            );
-            if (userResult.rows.length === 0) {
-                 userResult = await db.query(
+            const userId = req.user.id
+            const ruolo = req.user.ruolo
+            if (ruolo == "proprietario"){
+                let userResult = await db.query(
+                    queries.FIND_PROP_ID,
+                    [req.user.id]
+                );
+            }else {
+                userResult = await db.query(
                     queries.FIND_PROF_ID,
                     [req.user.id])
             }
+
             if (userResult.rows.length === 0) {
                 return res.status(401).json({error: 'Utente non trovato'})
             }
