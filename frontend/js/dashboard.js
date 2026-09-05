@@ -1,5 +1,9 @@
 //const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : 'http://localhost:3000/api';
 $(document).ready(function () {
+    $('button[data-bs-toggle="list"]').on('show.bs.tab', function () {
+        $('#dashboard-tabs .list-group-item').removeClass('active');
+    });
+
     const SITTERS_API = `${API_BASE_URL}/sitters`;
     const REVIEWS_API = `${API_BASE_URL}/reviews`;
     const token = localStorage.getItem('token');

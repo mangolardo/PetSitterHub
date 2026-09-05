@@ -57,39 +57,40 @@
         <div class="row g-4">
 
             <!-- SIDEBAR DI NAVIGAZIONE -->
+            <!-- SIDEBAR DI NAVIGAZIONE -->
             <div class="col-lg-3">
-                <div class="d-flex flex-column gap-3">
+                <!-- UNICO LIST-GROUP PER EVITARE DOPPIE SELEZIONI ATIVE -->
+                <div class="list-group list-group-custom" id="dashboard-tabs" role="tablist">
                     <!-- GRUPPO PRINCIPALE TAB -->
-                    <div class="list-group list-group-custom" id="dashboard-tabs" role="tablist">
-                        <button class="list-group-item list-group-item-action active" id="tab-profilo-btn" data-bs-toggle="list" data-bs-target="#tab-profilo" type="button">
-                            <i class="bi bi-person me-2"></i> Il Mio Profilo
-                        </button>
-                        <button class="list-group-item list-group-item-action" id="tab-servizi-btn" data-bs-toggle="list" data-bs-target="#tab-servizi" type="button">
-                            <i class="bi bi-journal-text me-2"></i> Servizi Offerti
-                        </button>
-                        <button class="list-group-item list-group-item-action" id="tab-calendario-btn" data-bs-toggle="list" data-bs-target="#tab-calendario" type="button">
-                            <i class="bi bi-calendar3 me-2"></i> Disponibilità
-                        </button>
-                        <button class="list-group-item list-group-item-action" id="tab-prenotazioni-btn" data-bs-toggle="list" data-bs-target="#tab-prenotazioni" type="button">
-                            <i class="bi bi-calendar-check me-2"></i> Prenotazioni
-                        </button>
-                        <button class="list-group-item list-group-item-action" id="tab-messaggi-btn" data-bs-toggle="list" data-bs-target="#tab-messaggi" type="button">
-                            <i class="bi bi-chat-left-dots me-2"></i> Messaggi
-                        </button>
-                        <button class="list-group-item list-group-item-action" id="tab-recensioni-btn" data-bs-toggle="list" data-bs-target="#tab-recensioni" type="button">
-                            <i class="bi bi-star me-2"></i> Recensioni
-                        </button>
-                    </div>
+                    <button class="list-group-item list-group-item-action active" id="tab-profilo-btn" data-bs-toggle="list" data-bs-target="#tab-profilo" type="button" role="tab" aria-controls="tab-profilo" aria-selected="true">
+                        <i class="bi bi-person me-2"></i> Il Mio Profilo
+                    </button>
+                    <button class="list-group-item list-group-item-action" id="tab-servizi-btn" data-bs-toggle="list" data-bs-target="#tab-servizi" type="button" role="tab" aria-controls="tab-servizi" aria-selected="false">
+                        <i class="bi bi-journal-text me-2"></i> Servizi Offerti
+                    </button>
+                    <button class="list-group-item list-group-item-action" id="tab-calendario-btn" data-bs-toggle="list" data-bs-target="#tab-calendario" type="button" role="tab" aria-controls="tab-calendario" aria-selected="false">
+                        <i class="bi bi-calendar3 me-2"></i> Disponibilità
+                    </button>
+                    <button class="list-group-item list-group-item-action" id="tab-prenotazioni-btn" data-bs-toggle="list" data-bs-target="#tab-prenotazioni" type="button" role="tab" aria-controls="tab-prenotazioni" aria-selected="false">
+                        <i class="bi bi-calendar-check me-2"></i> Prenotazioni
+                    </button>
+                    <button class="list-group-item list-group-item-action" id="tab-messaggi-btn" data-bs-toggle="list" data-bs-target="#tab-messaggi" type="button" role="tab" aria-controls="tab-messaggi" aria-selected="false">
+                        <i class="bi bi-chat-left-dots me-2"></i> Messaggi
+                    </button>
+                    <button class="list-group-item list-group-item-action" id="tab-recensioni-btn" data-bs-toggle="list" data-bs-target="#tab-recensioni" type="button" role="tab" aria-controls="tab-recensioni" aria-selected="false">
+                        <i class="bi bi-star me-2"></i> Recensioni
+                    </button>
 
-                    <!-- GRUPPO IN BASSO: GESTIONE ACCOUNT -->
-                    <div class="list-group list-group-custom" role="tablist">
-                        <button class="list-group-item list-group-item-action" id="tab-modifica-profilo-btn" data-bs-toggle="list" data-bs-target="#tab-modifica-profilo" type="button">
-                            <i class="bi bi-pencil-square me-2"></i> Modifica Profilo
-                        </button>
-                        <button class="list-group-item list-group-item-action" id="tab-password-btn" data-bs-toggle="list" data-bs-target="#tab-password" type="button">
-                            <i class="bi bi-shield-lock me-2"></i> Modifica Password
-                        </button>
-                    </div>
+                    <!-- DIVISORE GRAFICO TRA I GRUPPI -->
+                    <div class="my-2 border-top"></div>
+
+                    <!-- GRUPPO GESTIONE ACCOUNT -->
+                    <button class="list-group-item list-group-item-action" id="tab-modifica-profilo-btn" data-bs-toggle="list" data-bs-target="#tab-modifica-profilo" type="button" role="tab" aria-controls="tab-modifica-profilo" aria-selected="false">
+                        <i class="bi bi-pencil-square me-2"></i> Modifica Profilo
+                    </button>
+                    <button class="list-group-item list-group-item-action" id="tab-password-btn" data-bs-toggle="list" data-bs-target="#tab-password" type="button" role="tab" aria-controls="tab-password" aria-selected="false">
+                        <i class="bi bi-shield-lock me-2"></i> Modifica Password
+                    </button>
                 </div>
             </div>
 
