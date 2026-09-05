@@ -1,6 +1,6 @@
 describe('Flusso di Prenotazione', () => {
   beforeEach(() => {
-    cy.visit('./prenotazioni.html', {
+    cy.visit('./prenotazione.html', {
       onBeforeLoad(win) {
         win.localStorage.setItem('token', 'token-valido-di-prova');
       }
