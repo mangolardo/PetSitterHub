@@ -1,13 +1,9 @@
+const API_BASE_URL = require('./config.js')
 $(document).ready(function () {
     // Previene attacchi XSS
     function escapeHtml(text) {
         return $('<div>').text(text || '').html();
     }
-
-    // Configurazione Base URL
-    const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL)
-        ? CONFIG.API_BASE_URL
-        : (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '');
 
     // Recupera l'ID del professionista dall'URL (es. profilo-sitter.html?id=5)
     const urlParams = new URLSearchParams(window.location.search);
@@ -56,7 +52,7 @@ $(document).ready(function () {
      */
     function fetchSitterDetails(id) {
         return $.ajax({
-            url: `${baseUrl}/professionisti/${id}`, // o la tua rotta per il profilo
+            url: `${API_BASE_URL}/sitters/${id}`, // o la tua rotta per il profilo
             method: 'GET',
             dataType: 'json'
         });
@@ -67,7 +63,7 @@ $(document).ready(function () {
      */
     function fetchSitterServices(id) {
         return $.ajax({
-            url: `${baseUrl}/services/${id}/services`,
+            url: `${API_BASE_URL}/services/${id}`,
             method: 'GET',
             dataType: 'json'
         });
@@ -78,7 +74,7 @@ $(document).ready(function () {
      */
     function fetchSitterReviews(id) {
         return $.ajax({
-            url: `${baseUrl}/recensioni/${id}`,
+            url: `${API_BASE_URL}/reviews/${id}`,
             method: 'GET',
             dataType: 'json'
         });

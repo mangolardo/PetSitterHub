@@ -1,7 +1,7 @@
 $(document).ready(function () {
     const token = localStorage.getItem('token');
-    const API_BASE_URL = '${API_BASE_URL}/messaggi';
-
+    let API_BASE_URL = require('./config.js')
+    API_BASE_URL = `${API_BASE_URL}/messages/`
     if (!token) return;
 
     $.ajaxSetup({

@@ -61,7 +61,7 @@ $(document).ready(function () {
      */
     function loadServiceInfo(id) {
         $.ajax({
-            url: `${API_BASE_URL}/servizi/${id}`,
+            url: `${API_BASE_URL}/services/service/${id}`,
             method: 'GET',
             success: function(servizio) {
                 $('#booking-servizio-text').val(`${servizio.tipologia} (${servizio.tipo_animale})`);
