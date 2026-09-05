@@ -1,3 +1,4 @@
+const API_BASE_URL = require('./config.js')
 $(document).ready(function () {
     // Previene attacchi XSS
     function escapeHtml(text) {
@@ -5,7 +6,7 @@ $(document).ready(function () {
     }
 
     // Configura la base URL delle API Express (assicurati che sia definita in config.js)
-    const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : '';
+   // const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : '';
 
     // Recupera l'ID del servizio dall'URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -37,7 +38,7 @@ $(document).ready(function () {
      */
     function loadServiceDetails(id) {
         $.ajax({
-            url: `${API_BASE_URL}/servizi/${id}`,
+            url: `${API_BASE_URL}/services/${id}`,
             method: 'GET',
             dataType: 'json',
             success: function (servizio) {

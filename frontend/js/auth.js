@@ -1,3 +1,4 @@
+const API_BASE_URL = require('./config.js')
 // Il token verrà allegato in automatico a tutte le chiamate AJAX
 $.ajaxSetup({
     beforeSend: function(xhr) {
@@ -9,7 +10,7 @@ $.ajaxSetup({
 });
 
 $(document).ready(function () {
-    const API_URL = '${API_BASE_URL}/auth';
+    const API_URL = `${API_BASE_URL}/auth`;
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/;
 
     checkAuth();
