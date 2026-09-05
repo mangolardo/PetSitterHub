@@ -1,0 +1,38 @@
+name: Backend Tests (Jest)
+
+# Eseguiamo i test ogni volta che c'è un push o una pull request sul branch principale
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # Diciamo a GitHub di posizionarsi nella cartella del backend prima di lanciare i comandi
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      # 1. Scarica il codice dal repository
+      - name: Checkout del codice
+        uses: actions/checkout@v4
+
+      # 2. Installa l'ambiente Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: ./backend/package-lock.json
+
+      # 3. Installa le dipendenze in modo pulito
+      - name: Installa pacchetti (npm ci)
+        run: npm ci
+
+      # 4. Lancia la tua suite di test!
+      - name: Esegui i Test Unitari
+        run: npm test

@@ -11,9 +11,9 @@ name: Deploy PetSitterHub su Google Cloud Run
 
 # Variabili d'ambiente da personalizzare con i dati del tuo progetto GCP
 env:
-  PROJECT_ID: 'project-d0dedbe4-a22d-46ef-8cf'
+  PROJECT_ID: 'petsitterhub'
   REGION: 'europe-west6' # Inserisci la region che preferisci
-  GAR_LOCATION: 'europe-west6-docker.pkg.dev/project-d0dedbe4-a22d-46ef-8cf/petsitter-repo'
+  GAR_LOCATION: 'europe-west6-docker.pkg.dev/petsitterhub/petsitterhub-repo'
 
 jobs:
   # JOB 1: Test, Build e Deploy del BACKEND
@@ -44,6 +44,15 @@ jobs:
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Recupera l'URL del Backend dinamico
+        id: get-url
+        run: |
+         BACKEND_URL=$(gcloud run services describe petsitter-backend --region ${{ env.REGION }} --format 'value(status.url)')
+         echo "BACKEND_URL=$BACKEND_URL" >> $GITHUB_ENV
+      - name: Inietta l'URL nel codice Frontend
+        run: |
+         sed -i "s|__BACKEND_URL__|${{ env.BACKEND_URL }}|g" ./frontend/js/config.js
+
       - name: Configurazione Docker per Artifact Registry
         run: gcloud auth configure-docker europe-west1-docker.pkg.dev
 
@@ -53,15 +62,14 @@ jobs:
           docker build -t ${{ env.GAR_LOCATION }}/backend:${{ github.sha }} ./backend
           docker push ${{ env.GAR_LOCATION }}/backend:${{ github.sha }}
 
-      # Deploy su Cloud Run con scaling automatico
+      # Deploy su Cloud Run (Backend)
       - name: Rilascio su Cloud Run (Backend)
         run: |
           gcloud run deploy petsitter-backend \
             --image ${{ env.GAR_LOCATION }}/backend:${{ github.sha }} \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --port 3000
-
+            --set-env-vars DB_USER=${{ secrets.DB_USER }},DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_NAME=${{ secrets.DB_NAME }},INSTANCE_CONNECTION_NAME=${{ secrets.INSTANCE_CONNECTION_NAME }}
   # JOB 2: Build e Deploy del FRONTEND (inizia dopo il backend)
   deploy-frontend:
     name: Build e Deploy Frontend
