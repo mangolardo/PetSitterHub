@@ -105,9 +105,9 @@ $(document).ready(function () {
                                             <small class="text-muted d-block" style="font-size: 0.75rem;">Tariffa</small>
                                             <strong class="text-success fs-5">€${tariffa}</strong>
                                         </div>
-                                        <a href="prenotazione.html?id_servizio=${idServizio}" class="btn btn-coral btn-sm rounded-pill px-3">
-                                            Prenota ora
-                                        </a>
+                                        <a href="dettaglio-servizio.html?id_servizio=${idServizio}" class="btn btn-outline-coral btn-sm rounded-pill px-3">
+                                          Vedi dettagli
+                                         </a>
                                     </div>
                                 </div>
                             </article>
