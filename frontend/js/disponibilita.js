@@ -1,200 +1,331 @@
-$(document).ready(function () {
-    const token = localStorage.getItem('token');
+let calendarInstance = null;
+let modalCalendarInstance = null;
 
-    // Configura l'header di autorizzazione globale per AJAX se l'utente è loggato
-    if (token) {
-        $.ajaxSetup({
+$(document).ready(function () {
+    // Inizializza il calendario principale quando viene mostrata la tab "Disponibilità"
+    $('#tab-calendario-btn').on('shown.bs.tab', function () {
+        if (!calendarInstance) {
+            initMainCalendar();
+        } else {
+            calendarInstance.render();
+            calendarInstance.refetchEvents();
+        }
+    });
+
+    // Gestione invio form creazione nuova disponibilità
+    $('#form-crea-disponibilita').on('submit', handleAddAvailability);
+
+    // Gestione apertura modale gestione disponibilità da singola riga servizio
+    $('#modalDisponibilita').on('shown.bs.modal', function () {
+        if (modalCalendarInstance) {
+            modalCalendarInstance.render();
+            modalCalendarInstance.refetchEvents();
+        }
+    });
+});
+
+/**
+ * Recupera l'elenco dei servizi del professionista loggato
+ * e popolamento della Select nel modale di creazione.
+ */
+async function loadSitterServicesForSelect() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${CONFIG.API_BASE_URL}/servizi/miei-servizi`, {
             headers: {
-                'Authorization': 'Bearer ' + token
+                'Authorization': `Bearer ${token}`
             }
         });
+
+        if (!response.ok) throw new Error('Impossibile caricare i servizi.');
+
+        const servizi = await response.json();
+        const $select = $('#disp-servizio-select');
+
+        $select.empty().append('<option value="" selected disabled>Seleziona un servizio...</option>');
+
+        servizi.forEach(servizio => {
+            $select.append(`
+                <option value="${servizio.id}">
+                    ${servizio.tipologia} - ${servizio.tipo_animale} (${servizio.zona})
+                </option>
+            `);
+        });
+    } catch (error) {
+        console.error('Errore durante il caricamento dei servizi per la select:', error);
     }
+}
 
-    // Estrae l'ID servizio dall'URL (es. dettaglio-servizio.html?id_servizio=5)
-    const urlParams = new URLSearchParams(window.location.search);
-    const idServizio = urlParams.get('id_servizio') || urlParams.get('id');
+/**
+ * Inizializza il calendario principale nella tab Disponibilità.
+ */
+function initMainCalendar() {
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
 
-    // --- 1. FUNZIONE PER CARICARE LE DISPONIBILITÀ (GET) ---
-    window.loadAvailabilities = function (serviceId) {
-        const targetId = serviceId || idServizio;
-        const $container = $('#disponibilitaContainer');
+    // Popola le opzioni della select dei servizi nel modale
+    loadSitterServicesForSelect();
 
-        if (!targetId || !$container.length) return;
+    calendarInstance = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'it',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        selectable: true,
+        selectMirror: true,
 
-        $.ajax({
-            url: `${API_BASE_URL}/disponibilita/${targetId}`,
-            method: 'GET',
-            dataType: 'json',
-            success: function (disponibilita) {
-                $container.empty();
+        // Selezione/Trasccinamento di date per creare un nuovo slot
+        select: function (info) {
+            openCreateModal(info.startStr, info.endStr);
+        },
 
-                if (!disponibilita || disponibilita.length === 0) {
-                    $container.html(`
-                        <div class="dash-card p-3 text-center text-muted">
-                            <i class="bi bi-calendar-x fs-2 d-block mb-1 text-secondary"></i>
-                            Nessuna disponibilità programmata al momento.
-                        </div>
-                    `);
+        // Click su uno slot esistente per eliminarlo
+        eventClick: function (info) {
+            deleteAvailability(info.event.id);
+        },
+
+        // Caricamento eventi da tutti i servizi del professionista
+        events: async function (fetchInfo, successCallback, failureCallback) {
+            try {
+                const token = localStorage.getItem('token');
+
+                // 1. Recupera i servizi del professionista
+                const resServizi = await fetch(`${CONFIG.API_BASE_URL}/servizi/miei-servizi`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!resServizi.ok) {
+                    successCallback([]);
                     return;
                 }
 
-                const currentUserId = getCurrentUserId();
+                const servizi = await resServizi.json();
+                let allEvents = [];
 
-                disponibilita.forEach(function (disp) {
-                    const dataInizio = formatDateTime(disp.data_inizio);
-                    const dataFine = formatDateTime(disp.data_fine);
-
-                    // Tasto elimina visibile solo se l'utente è il proprietario
-                    let deleteBtn = '';
-                    if (disp.id_professionista === currentUserId || disp.is_owner) {
-                        deleteBtn = `
-                            <button class="btn btn-sm btn-outline-danger btn-delete-disp ms-auto" data-id="${disp.id}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        `;
+                // 2. Per ciascun servizio recupera le relative disponibilità
+                for (const serv of servizi) {
+                    const resDisp = await fetch(`${CONFIG.API_BASE_URL}/disponibilita/${serv.id}`);
+                    if (resDisp.ok) {
+                        const dispList = await resDisp.json();
+                        const mappedEvents = dispList.map(item => ({
+                            id: item.id,
+                            title: `${serv.tipologia} (${serv.tipo_animale})`,
+                            start: item.data_inizio,
+                            end: item.data_fine,
+                            backgroundColor: '#20c997',
+                            borderColor: '#198754',
+                            textColor: '#ffffff'
+                        }));
+                        allEvents = allEvents.concat(mappedEvents);
                     }
+                }
 
-                    $container.append(`
-                        <div class="dash-card p-3 mb-2 d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-clock-history color-green fs-5"></i>
-                                <div>
-                                    <span class="fw-semibold text-dark">${dataInizio}</span>
-                                    <span class="text-muted mx-1">→</span>
-                                    <span class="fw-semibold text-dark">${dataFine}</span>
-                                </div>
-                            </div>
-                            ${deleteBtn}
-                        </div>
-                    `);
-                });
-            },
-            error: function (xhr) {
-                console.error("Errore nel caricamento delle disponibilità:", xhr);
-                $container.html(`
-                    <div class="alert alert-danger p-2 text-center" role="alert">
-                        Errore durante il caricamento delle disponibilità.
-                    </div>
-                `);
+                successCallback(allEvents);
+            } catch (err) {
+                console.error('Errore nel caricamento eventi calendario:', err);
+                failureCallback(err);
             }
-        });
+        }
+    });
+
+    calendarInstance.render();
+}
+
+/**
+ * Apre il modale per la creazione di un nuovo slot impostando le date pre-selezionate.
+ */
+function openCreateModal(startIso, endIso) {
+    // Adatta il formato ISO a 'YYYY-MM-THH:mm' per l'input datetime-local
+    const formatForInput = (isoStr) => {
+        if (!isoStr) return '';
+        const d = new Date(isoStr);
+        const pad = (num) => String(num).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
 
-    // Esegue il caricamento automatico all'avvio se è presente l'ID nell'URL
-    if (idServizio) {
-        window.loadAvailabilities(idServizio);
+    $('#disp-inizio-input').val(formatForInput(startIso));
+    $('#disp-fine-input').val(formatForInput(endIso));
+
+    const modalEl = document.getElementById('modalCreaDisponibilita');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+}
+
+/**
+ * Handler per l'invio del form di creazione nuova disponibilità.
+ */
+async function handleAddAvailability(e) {
+    e.preventDefault();
+
+    const idServizio = $('#disp-servizio-select').val();
+    const dataInizio = $('#disp-inizio-input').val();
+    const dataFine = $('#disp-fine-input').val();
+
+    if (!idServizio) {
+        alert('Seleziona prima un servizio.');
+        return;
     }
 
-    // --- 2. AGGIUNTA NUOVA DISPONIBILITÀ (POST) ---
-    $('#addAvailabilityForm').on('submit', function (e) {
-        e.preventDefault();
+    if (new Date(dataInizio) >= new Date(dataFine)) {
+        alert('La data di fine deve essere successiva alla data di inizio.');
+        return;
+    }
 
-        if (!token) {
-            showDispAlert('Devi effettuare il login per aggiungere disponibilità.', 'danger');
-            return;
-        }
-
-        const targetServiceId = $('#dispServizioId').val() || idServizio;
-        const dataInizio = $('#dispDataInizio').val();
-        const dataFine = $('#dispDataFine').val();
-
-        if (!targetServiceId) {
-            showDispAlert('ID servizio non valido.', 'danger');
-            return;
-        }
-
-        if (new Date(dataInizio) >= new Date(dataFine)) {
-            showDispAlert('La data/ora di fine deve essere successiva a quella di inizio.', 'danger');
-            return;
-        }
-
-        const $btn = $('#btnSubmitDisp');
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Salvataggio...');
-
-        const payload = {
-            data_inizio: dataInizio,
-            data_fine: dataFine
-        };
-
-        $.ajax({
-            url: `${API_BASE_URL}/disponibilita/${targetServiceId}`,
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${CONFIG.API_BASE_URL}/disponibilita/${idServizio}`, {
             method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(payload),
-            success: function (response) {
-                showDispAlert(response.message || 'Disponibilità aggiunta con successo!', 'success');
-                $('#addAvailabilityForm')[0].reset();
-                $btn.prop('disabled', false).text('Aggiungi Disponibilità');
-
-                // Ricarica la lista delle disponibilità
-                window.loadAvailabilities(targetServiceId);
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
-            error: function (xhr) {
-                $btn.prop('disabled', false).text('Aggiungi Disponibilità');
-                const errorMsg = xhr.responseJSON?.error || 'Errore durante l\'aggiunta della disponibilità.';
-                showDispAlert(errorMsg, 'danger');
-            }
+            body: JSON.stringify({
+                data_inizio: dataInizio,
+                data_fine: dataFine
+            })
         });
-    });
 
-    // --- 3. CANCELLAZIONE DISPONIBILITÀ (DELETE) ---
-    $(document).on('click', '.btn-delete-disp', function () {
-        const idDisponibilita = $(this).data('id');
+        const data = await response.json();
 
-        if (!confirm('Sei sicuro di voler rimuovere questa disponibilità?')) {
-            return;
+        if (!response.ok) {
+            throw new Error(data.error || 'Errore durante l\'aggiunta della disponibilità.');
         }
 
-        $.ajax({
-            url: `${API_BASE_URL}/disponibilita/${idDisponibilita}`,
+        // Chiudi il modale e resetta il form
+        const modalEl = document.getElementById('modalCreaDisponibilita');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        $('#form-crea-disponibilita')[0].reset();
+
+        // Ricarica gli eventi sul calendario
+        if (calendarInstance) {
+            calendarInstance.refetchEvents();
+        }
+        if (modalCalendarInstance) {
+            modalCalendarInstance.refetchEvents();
+        }
+
+        showAlert('Disponibilità salvata con successo!', 'success');
+    } catch (error) {
+        console.error('Errore addAvailability:', error);
+        alert(error.message);
+    }
+}
+
+/**
+ * Cancella uno slot di disponibilità previa conferma dell'utente.
+ */
+async function deleteAvailability(idDisponibilita) {
+    if (!confirm('Sei sicuro di voler rimuovere questa disponibilità?')) {
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${CONFIG.API_BASE_URL}/disponibilita/${idDisponibilita}`, {
             method: 'DELETE',
-            success: function (response) {
-                window.loadAvailabilities(idServizio);
-            },
-            error: function (xhr) {
-                const errorMsg = xhr.responseJSON?.error || 'Errore durante la cancellazione.';
-                alert(errorMsg);
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
         });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Errore durante l\'eliminazione della disponibilità.');
+        }
+
+        // Aggiorna il calendario
+        if (calendarInstance) {
+            calendarInstance.refetchEvents();
+        }
+        if (modalCalendarInstance) {
+            modalCalendarInstance.refetchEvents();
+        }
+
+        showAlert('Disponibilità rimossa con successo.', 'info');
+    } catch (error) {
+        console.error('Errore deleteAvailability:', error);
+        alert(error.message);
+    }
+}
+
+/**
+ * Funzione di utilità per inizializzare il calendario all'interno del modale dedicato al singolo servizio (`#modalDisponibilita`).
+ * Può essere richiamata dalla gestione della tabella dei servizi.
+ */
+function openModalForService(idServizio, titoloServizio) {
+    $('#disp-servizio-id').val(idServizio);
+    if (titoloServizio) {
+        $('#modalDisponibilitaLabel').text(`Gestione Disponibilità - ${titoloServizio}`);
+    }
+
+    const calendarEl = document.getElementById('modal-calendar');
+    if (!calendarEl) return;
+
+    if (modalCalendarInstance) {
+        modalCalendarInstance.destroy();
+    }
+
+    modalCalendarInstance = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'it',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
+        },
+        selectable: true,
+        select: function (info) {
+            $('#disp-servizio-select').val(idServizio);
+            openCreateModal(info.startStr, info.endStr);
+        },
+        eventClick: function (info) {
+            deleteAvailability(info.event.id);
+        },
+        events: async function (fetchInfo, successCallback, failureCallback) {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/disponibilita/${idServizio}`);
+                if (!response.ok) throw new Error('Errore nel recupero delle disponibilità');
+
+                const dispList = await response.json();
+                const events = dispList.map(item => ({
+                    id: item.id,
+                    title: 'Disponibile',
+                    start: item.data_inizio,
+                    end: item.data_fine,
+                    backgroundColor: '#20c997',
+                    borderColor: '#198754'
+                }));
+
+                successCallback(events);
+            } catch (err) {
+                failureCallback(err);
+            }
+        }
     });
 
-    // Helper per mostrare avvisi d'errore o successo nel modulo
-    function showDispAlert(msg, type) {
-        const $alert = $('#dispAlert');
-        if ($alert.length) {
-            $alert.removeClass('d-none alert-success alert-danger')
-                  .addClass(`alert-${type}`)
-                  .text(msg);
-        } else {
-            alert(msg);
-        }
-    }
+    const modalEl = document.getElementById('modalDisponibilita');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+}
 
-    // Helper per formattare la data leggibile in italiano
-    function formatDateTime(isoString) {
-        if (!isoString) return '-';
-        const date = new Date(isoString);
-        return date.toLocaleString('it-IT', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
+/**
+ * Mostra un messaggio di avviso nell'alert globale della dashboard.
+ */
+function showAlert(message, type = 'success') {
+    const $alert = $('#alert-message');
+    if ($alert.length) {
+        $alert
+            .removeClass('d-none alert-success alert-danger alert-info alert-warning')
+            .addClass(`alert-${type}`)
+            .text(message);
 
-    // Helper per estrarre l'ID utente loggato dal JWT
-    function getCurrentUserId() {
-        if (!token) return null;
-        try {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            return JSON.parse(jsonPayload).id;
-        } catch (e) {
-            return null;
-        }
+        setTimeout(() => {
+            $alert.addClass('d-none');
+        }, 4000);
     }
-});
+}
