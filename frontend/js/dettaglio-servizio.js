@@ -1,3 +1,4 @@
+const API_BASE_URL = require('./config.js')
 $(document).ready(function () {
     // Previene attacchi XSS
     function escapeHtml(text) {
@@ -5,10 +6,10 @@ $(document).ready(function () {
     }
 
     // Gestione dinamica dell'URL API senza require()
-    const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL)
+    /*const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL)
         ? CONFIG.API_BASE_URL
         : (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '');
-
+*/
     // Recupera l'ID del servizio dall'URL
     const urlParams = new URLSearchParams(window.location.search);
     const idServizio = urlParams.get('id_servizio') || urlParams.get('id');
@@ -38,7 +39,7 @@ $(document).ready(function () {
      */
     function loadServiceDetails(id) {
         $.ajax({
-            url: `${baseUrl}/services/${id}`,
+            url: `${API_BASE_URL}/services/${id}`,
             method: 'GET',
             dataType: 'json',
             success: function (servizio) {
@@ -107,7 +108,7 @@ $(document).ready(function () {
      */
     function loadReviews(idProfessionista) {
         $.ajax({
-            url: `${baseUrl}/recensioni/${idProfessionista}`,
+            url: `${API_BASE_URL}/reviews/${idProfessionista}`,
             method: 'GET',
             dataType: 'json',
             success: function (recensioni) {
@@ -230,7 +231,7 @@ $(document).ready(function () {
             $btnSubmit.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Invio in corso...');
 
             $.ajax({
-                url: `${baseUrl}/recensioni/add`,
+                url: `${API_BASE_URL}/reviews/`,
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -281,7 +282,7 @@ $(document).ready(function () {
         }
 
         $.ajax({
-            url: `${baseUrl}/recensioni/delete/${idRecensione}`,
+            url: `${API_BASE_URL}/reviews/${idRecensione}`,
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`

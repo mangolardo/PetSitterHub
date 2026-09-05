@@ -1,3 +1,4 @@
+const API_BASE_URL = require('./config.js')
 let calendarInstance = null;
 let modalCalendarInstance = null;
 
@@ -31,7 +32,7 @@ $(document).ready(function () {
 async function loadSitterServicesForSelect() {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${CONFIG.API_BASE_URL}/servizi/miei-servizi`, {
+        const response = await fetch(`${API_BASE_URL}/services`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -46,7 +47,7 @@ async function loadSitterServicesForSelect() {
 
         servizi.forEach(servizio => {
             $select.append(`
-                <option value="${servizio.id}">
+                <option value="${servizio.id}/services">
                     ${servizio.tipologia} - ${servizio.tipo_animale} (${servizio.zona})
                 </option>
             `);
@@ -93,7 +94,7 @@ function initMainCalendar() {
                 const token = localStorage.getItem('token');
 
                 // 1. Recupera i servizi del professionista
-                const resServizi = await fetch(`${CONFIG.API_BASE_URL}/servizi/miei-servizi`, {
+                const resServizi = await fetch(`${API_BASE_URL}/services`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -107,7 +108,7 @@ function initMainCalendar() {
 
                 // 2. Per ciascun servizio recupera le relative disponibilità
                 for (const serv of servizi) {
-                    const resDisp = await fetch(`${CONFIG.API_BASE_URL}/disponibilita/${serv.id}`);
+                    const resDisp = await fetch(`${API_BASE_URL}/availabilities/${serv.id}`);
                     if (resDisp.ok) {
                         const dispList = await resDisp.json();
                         const mappedEvents = dispList.map(item => ({
@@ -176,7 +177,7 @@ async function handleAddAvailability(e) {
 
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${CONFIG.API_BASE_URL}/disponibilita/${idServizio}`, {
+        const response = await fetch(`${API_BASE_URL}/availabilities/${idServizio}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -225,7 +226,7 @@ async function deleteAvailability(idDisponibilita) {
 
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${CONFIG.API_BASE_URL}/disponibilita/${idDisponibilita}`, {
+        const response = await fetch(`${API_BASE_URL}/availabilities/${idDisponibilita}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -288,7 +289,7 @@ function openModalForService(idServizio, titoloServizio) {
         },
         events: async function (fetchInfo, successCallback, failureCallback) {
             try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/disponibilita/${idServizio}`);
+                const response = await fetch(`${API_BASE_URL}/disponibilita/${idServizio}`);
                 if (!response.ok) throw new Error('Errore nel recupero delle disponibilità');
 
                 const dispList = await response.json();

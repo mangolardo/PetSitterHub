@@ -1,22 +1,23 @@
+const API_BASE_URL = require('./config.js')
 $(document).ready(function () {
     const SITTERS_API = `${API_BASE_URL}/sitters`;
     const REVIEWS_API = `${API_BASE_URL}/reviews`;
-    //const token = localStorage.getItem('token');
-    //const ruolo = localStorage.getItem('ruolo');
-    //let currentUserId = null;
+    const token = localStorage.getItem('token');
+    const ruolo = localStorage.getItem('ruolo');
+    let currentUserId = null;
 
     // Protezione rotta: solo i professionisti possono accedere alla dashboard
-    /*if (!token || ruolo !== 'professionista') {
+    if (!token || ruolo !== 'professionista') {
         window.location.href = 'login.html';
         return;
-    }*/
+    }
 
     // Carica profilo, servizi e recensioni all'avvio
-    //initDashboard();
+    initDashboard();
 
     function initDashboard() {
         $.ajax({
-            url: `${AUTH_API}/me`,
+            url: `${API_BASE_URL}/auth/me`,
             method: 'GET',
             //headers: { 'Authorization': `Bearer ${token}` },
             success: function (user) {
@@ -185,7 +186,7 @@ $(document).ready(function () {
         if (!confirm('Sei sicuro di voler eliminare questo servizio?')) return;
 
         $.ajax({
-            url: `${SITTERS_API}/servizi/${idServizio}`,
+            url: `${SITTERS_API}/services/${idServizio}`,
             method: 'DELETE',
             //headers: { 'Authorization': `Bearer ${token}` },
             success: function (response) {
