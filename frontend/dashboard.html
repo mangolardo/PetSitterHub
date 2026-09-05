@@ -46,7 +46,7 @@
                 <i class="bi bi-person-badge"></i> Area Riservata
             </div>
             <h1 class="h2 fw-bold">Gestione Pet-Sitter</h1>
-            <p class="text-muted">Gestisci i tuoi servizi, accetta prenotazioni e rispondi ai messaggi dei proprietari.</p>
+            <p class="text-muted">Gestisci il tuo profilo, i tuoi servizi, accetta prenotazioni e rispondi ai messaggi dei proprietari.</p>
         </div>
 
         <!-- CONTENITORE NOTIFICHE -->
@@ -56,22 +56,35 @@
 
             <!-- SIDEBAR DI NAVIGAZIONE -->
             <div class="col-lg-3">
-                <div class="list-group list-group-custom" id="dashboard-tabs" role="tablist">
-                    <button class="list-group-item list-group-item-action active" id="tab-servizi-btn" data-bs-toggle="list" data-bs-target="#tab-servizi" type="button">
-                        <i class="bi bi-journal-text me-2"></i> Servizi Offerti
-                    </button>
-                    <button class="list-group-item list-group-item-action" id="tab-prenotazioni-btn" data-bs-toggle="list" data-bs-target="#tab-prenotazioni" type="button">
-                        <i class="bi bi-calendar-check me-2"></i> Prenotazioni
-                    </button>
-                    <button class="list-group-item list-group-item-action" id="tab-messaggi-btn" data-bs-toggle="list" data-bs-target="#tab-messaggi" type="button">
-                        <i class="bi bi-chat-left-dots me-2"></i> Messaggi
-                    </button>
-                    <button class="list-group-item list-group-item-action" id="tab-recensioni-btn" data-bs-toggle="list" data-bs-target="#tab-recensioni" type="button">
-                        <i class="bi bi-star me-2"></i> Recensioni
-                    </button>
-                    <button class="list-group-item list-group-item-action" id="tab-profilo-btn" data-bs-toggle="list" data-bs-target="#tab-profilo" type="button">
-                        <i class="bi bi-person me-2"></i> Il Mio Profilo
-                    </button>
+                <div class="d-flex flex-column gap-3">
+                    <!-- GRUPPO PRINCIPALE TAB -->
+                    <div class="list-group list-group-custom" id="dashboard-tabs" role="tablist">
+                        <button class="list-group-item list-group-item-action active" id="tab-profilo-btn" data-bs-toggle="list" data-bs-target="#tab-profilo" type="button">
+                            <i class="bi bi-person me-2"></i> Il Mio Profilo
+                        </button>
+                        <button class="list-group-item list-group-item-action" id="tab-servizi-btn" data-bs-toggle="list" data-bs-target="#tab-servizi" type="button">
+                            <i class="bi bi-journal-text me-2"></i> Servizi Offerti
+                        </button>
+                        <button class="list-group-item list-group-item-action" id="tab-prenotazioni-btn" data-bs-toggle="list" data-bs-target="#tab-prenotazioni" type="button">
+                            <i class="bi bi-calendar-check me-2"></i> Prenotazioni
+                        </button>
+                        <button class="list-group-item list-group-item-action" id="tab-messaggi-btn" data-bs-toggle="list" data-bs-target="#tab-messaggi" type="button">
+                            <i class="bi bi-chat-left-dots me-2"></i> Messaggi
+                        </button>
+                        <button class="list-group-item list-group-item-action" id="tab-recensioni-btn" data-bs-toggle="list" data-bs-target="#tab-recensioni" type="button">
+                            <i class="bi bi-star me-2"></i> Recensioni
+                        </button>
+                    </div>
+
+                    <!-- GRUPPO IN BASSO: GESTIONE ACCOUNT -->
+                    <div class="list-group list-group-custom" role="tablist">
+                        <button class="list-group-item list-group-item-action" id="tab-modifica-profilo-btn" data-bs-toggle="list" data-bs-target="#tab-modifica-profilo" type="button">
+                            <i class="bi bi-pencil-square me-2"></i> Modifica Profilo
+                        </button>
+                        <button class="list-group-item list-group-item-action" id="tab-password-btn" data-bs-toggle="list" data-bs-target="#tab-password" type="button">
+                            <i class="bi bi-shield-lock me-2"></i> Modifica Password
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -79,8 +92,37 @@
             <div class="col-lg-9">
                 <div class="tab-content">
 
-                    <!-- TAB 1: SERVIZI -->
-                    <div class="tab-pane fade show active" id="tab-servizi" role="tabpanel">
+                    <!-- TAB 1: IL MIO PROFILO (SOLO DATI RIEPILOGO) -->
+                    <div class="tab-pane fade show active" id="tab-profilo" role="tabpanel">
+                        <div class="dash-card p-4">
+                            <div class="mb-4">
+                                <span class="hero-eyebrow mb-2">
+                                    <i class="bi bi-person-vcard"></i> Profilo Pet-Sitter
+                                </span>
+                                <h2 class="h4 fw-bold mt-2">Dati Account</h2>
+                            </div>
+
+                            <div class="card border-0 bg-light p-4 rounded-3">
+                                <div class="row g-4">
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block fw-bold mb-1">NOME</small>
+                                        <span id="summary-nome" class="fs-6 text-dark fw-semibold">—</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block fw-bold mb-1">COGNOME</small>
+                                        <span id="summary-cognome" class="fs-6 text-dark fw-semibold">—</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block fw-bold mb-1">INDIRIZZO EMAIL</small>
+                                        <span id="summary-email" class="fs-6 text-dark fw-semibold">—</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: SERVIZI -->
+                    <div class="tab-pane fade" id="tab-servizi" role="tabpanel">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h3 class="h4 fw-bold mb-0">I Miei Servizi</h3>
                             <button class="btn btn-coral rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalNuovoServizio">
@@ -110,7 +152,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB 2: PRENOTAZIONI -->
+                    <!-- TAB 3: PRENOTAZIONI -->
                     <div class="tab-pane fade" id="tab-prenotazioni" role="tabpanel">
                         <h3 class="h4 fw-bold mb-3">Prenotazioni Ricevute</h3>
                         <div class="dash-card p-4">
@@ -136,7 +178,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB 3: MESSAGGI -->
+                    <!-- TAB 4: MESSAGGI -->
                     <div class="tab-pane fade" id="tab-messaggi" role="tabpanel">
                         <h3 class="h4 fw-bold mb-3">Messaggi</h3>
                         <div class="dash-card overflow-hidden">
@@ -166,38 +208,95 @@
                         </div>
                     </div>
 
-                    <!-- TAB 4: RECENSIONI -->
+                    <!-- TAB 5: RECENSIONI -->
                     <div class="tab-pane fade" id="tab-recensioni" role="tabpanel">
-                        <h3 class="h4 fw-bold mb-3">Le Mie Recensioni</h3>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="h4 fw-bold mb-0">Le Mie Recensioni</h3>
+                        </div>
+
+                        <!-- Il contenitore dinamico caricato da jQuery -->
                         <div id="lista-recensioni" class="d-flex flex-column gap-3">
-                            <div class="text-center py-4 text-muted">Caricamento recensioni...</div>
+                            <div class="text-center py-4 text-muted">Seleziona la scheda per caricare le recensioni...</div>
                         </div>
                     </div>
 
-                    <!-- TAB 5: PROFILO -->
-                    <div class="tab-pane fade" id="tab-profilo" role="tabpanel">
-                        <h3 class="h4 fw-bold mb-3">Profilo Personale</h3>
+                    <!-- TAB 6: MODIFICA PROFILO -->
+                    <div class="tab-pane fade" id="tab-modifica-profilo" role="tabpanel">
                         <div class="dash-card p-4">
-                            <form id="form-profilo">
+                            <div class="mb-4">
+                                <span class="hero-eyebrow mb-2">
+                                    <i class="bi bi-pencil-square"></i> Gestione Profilo
+                                </span>
+                                <h2 class="h4 fw-bold mt-2">Modifica Dati Account</h2>
+                            </div>
+
+                            <form id="profile-form" novalidate>
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label fw-bold">Nome</label>
-                                        <input type="text" class="form-control" id="prof-nome" required>
+                                        <label for="profile-nome-input" class="form-label fw-semibold">Nome</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                            <input type="text" id="profile-nome-input" class="form-control" required>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fw-bold">Cognome</label>
-                                        <input type="text" class="form-control" id="prof-cognome" required>
+                                        <label for="profile-cognome-input" class="form-label fw-semibold">Cognome</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                            <input type="text" id="profile-cognome-input" class="form-control" required>
+                                        </div>
                                     </div>
                                     <div class="col-md-12">
-                                        <label class="form-label fw-bold">Email</label>
-                                        <input type="email" class="form-control bg-light" id="prof-email" readonly disabled>
+                                        <label for="profile-email-input" class="form-label fw-semibold">Indirizzo Email</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                            <input type="email" id="profile-email-input" class="form-control" required>
+                                        </div>
                                     </div>
-                                    <div class="col-md-12">
-                                        <button type="submit" class="btn btn-coral rounded-pill px-4 mt-2">
-                                            Salva Modifiche Profilo
+                                    <div class="col-md-12 mt-4">
+                                        <button type="submit" class="btn btn-coral rounded-pill px-4" id="btn-save-profile">
+                                            <i class="bi bi-save me-1"></i> Salva Modifiche Profilo
                                         </button>
                                     </div>
                                 </div>
+                                <p id="profile-status" class="search-status mt-3 mb-0" aria-live="polite"></p>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- TAB 7: MODIFICA PASSWORD (BLOCCO DEDICATO) -->
+                    <div class="tab-pane fade" id="tab-password" role="tabpanel">
+                        <div class="dash-card p-4">
+                            <div class="mb-4">
+                                <span class="hero-eyebrow mb-2">
+                                    <i class="bi bi-shield-lock"></i> Sicurezza
+                                </span>
+                                <h2 class="h4 fw-bold mt-2">Aggiorna Password</h2>
+                            </div>
+
+                            <form id="update-password-form" novalidate>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="old-password" class="form-label fw-semibold">Password Attuale</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                            <input type="password" id="old-password" class="form-control" placeholder="••••••••" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="new-password" class="form-label fw-semibold">Nuova Password</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                            <input type="password" id="new-password" class="form-control" placeholder="••••••••" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 mt-4">
+                                        <button type="submit" class="btn btn-coral rounded-pill px-4">
+                                            <i class="bi bi-save me-1"></i> Cambia Password
+                                        </button>
+                                    </div>
+                                </div>
+                                <p id="password-status" class="search-status mt-3 mb-0" aria-live="polite"></p>
                             </form>
                         </div>
                     </div>
@@ -328,9 +427,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/dashboard-sitter.js"></script>
 <script src="js/disponibilita.js"></script>
-<script src="js/recensioni.js"></script>
 <script src="js/messaggi.js"></script>
+<script src="js/dashboard.js"></script>
 </body>
 </html>

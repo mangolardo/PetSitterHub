@@ -34,7 +34,6 @@ $(document).ready(function () {
         if (pZona) queryParams.zona = pZona;
         if (pServizio) queryParams.servizio = pServizio;
         if (pAnimale) {
-            queryParams.tipo_animale = pAnimale;
             queryParams.animale = pAnimale;
         }
 

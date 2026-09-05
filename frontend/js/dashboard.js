@@ -1,33 +1,34 @@
 $(document).ready(function () {
-    const SITTERS_API = '${API_BASE_URL}/sitters';
-    const AUTH_API = '${API_BASE_URL}/auth';
-    const token = localStorage.getItem('token');
-    const ruolo = localStorage.getItem('ruolo');
-    let currentUserId = null;
+    const SITTERS_API = `${API_BASE_URL}/sitters`;
+    const REVIEWS_API = `${API_BASE_URL}/reviews`;
+    //const token = localStorage.getItem('token');
+    //const ruolo = localStorage.getItem('ruolo');
+    //let currentUserId = null;
 
     // Protezione rotta: solo i professionisti possono accedere alla dashboard
-    if (!token || ruolo !== 'professionista') {
+    /*if (!token || ruolo !== 'professionista') {
         window.location.href = 'login.html';
         return;
-    }
+    }*/
 
-    // Carica profilo e servizi all'avvio
-    initDashboard();
+    // Carica profilo, servizi e recensioni all'avvio
+    //initDashboard();
 
     function initDashboard() {
         $.ajax({
             url: `${AUTH_API}/me`,
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` },
+            //headers: { 'Authorization': `Bearer ${token}` },
             success: function (user) {
                 currentUserId = user.id;
                 $('#nav-sitter-nome').text(`${user.nome} ${user.cognome}`);
-                $('#prof-nome').val(user.nome);
-                $('#prof-cognome').val(user.cognome);
-                $('#prof-email').val(user.email);
+                $('#summary-nome').text(user.nome || '—');
+                $('#summary-cognome').text(user.cognome || '—');
+                $('#summary-email').text(user.email || '—');;
 
-                // Carica i servizi del sitter corrente
+                // Carica i dati del professionista corrente
                 loadMyServices(currentUserId);
+                loadMyReviews(currentUserId); // <-- Richiamo caricamento recensioni
             },
             error: function () {
                 localStorage.clear();
@@ -35,6 +36,77 @@ $(document).ready(function () {
             }
         });
     }
+
+    //Event Listener: Ricarica le recensioni quando si clicca sulla tab dedicata
+        $('#tab-recensioni-btn').on('click', function () {
+            if (currentUserId) {
+                loadMyReviews(currentUserId);
+            }
+        });
+
+    // --- CARICAMENTO RECENSIONI (GET /api/reviews/:id_professionista) ---
+    function loadMyReviews(sitterId) {
+            const $container = $('#lista-recensioni');
+            $container.html('<div class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Caricamento recensioni...</div>');
+
+            $.ajax({
+                url: `${REVIEWS_API}/${sitterId}`,
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` },
+                success: function (recensioni) {
+                    $container.empty();
+
+                    if (!recensioni || recensioni.length === 0) {
+                        $container.html(`
+                            <div class="dash-card p-4 text-center text-muted">
+                                <i class="bi bi-star fs-1 d-block mb-2 text-secondary"></i>
+                                Nessuna recensione ricevuta al momento.
+                            </div>
+                        `);
+                        return;
+                    }
+
+                    recensioni.forEach(function (rev) {
+                        const stelleHtml = renderStars(rev.voto || rev.stelle || 0);
+                        const dataFormattata = rev.data_creazione
+                            ? new Date(rev.data_creazione).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                            : '';
+
+                        const cardHtml = `
+                            <div class="dash-card p-3 shadow-sm border-0 rounded-3 mb-3 bg-white">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-person-circle fs-4 text-secondary"></i>
+                                        <strong class="text-dark">${escapeHtml(rev.nome_cliente || rev.autore || 'Cliente')}</strong>
+                                        <span class="ms-2">${stelleHtml}</span>
+                                    </div>
+                                    <small class="text-muted">${dataFormattata}</small>
+                                </div>
+                                <p class="mb-0 text-secondary ps-1">${escapeHtml(rev.testo || rev.commento || '')}</p>
+                            </div>
+                        `;
+                        $container.append(cardHtml);
+                    });
+                },
+                error: function (xhr) {
+                    $container.html('<div class="text-center py-4 text-danger">Impossibile caricare le recensioni.</div>');
+                    showDashboardAlert(xhr.responseJSON?.error || 'Errore nel caricamento delle recensioni', 'danger');
+                }
+            });
+        }
+
+        // Helper per generare le stelle del rating
+        function renderStars(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    stars += '<i class="bi bi-star-fill text-warning me-1"></i>';
+                } else {
+                    stars += '<i class="bi bi-star text-muted opacity-50 me-1"></i>';
+                }
+            }
+            return stars;
+        }
 
     // --- CARICAMENTO SERVIZI NELLA TABELLA ---
     function loadMyServices(sitterId) {
@@ -89,18 +161,16 @@ $(document).ready(function () {
             url: `${SITTERS_API}/services`,
             method: 'POST',
             contentType: 'application/json',
-            headers: { 'Authorization': `Bearer ${token}` },
+            //headers: { 'Authorization': `Bearer ${token}` },
             data: JSON.stringify(payload),
             success: function (response) {
                 showDashboardAlert(response.message || 'Servizio aggiunto!', 'success');
                 $('#form-nuovo-servizio')[0].reset();
 
-                // Chiude la modale Bootstrap
                 const modalEl = document.getElementById('modalNuovoServizio');
                 const modal = bootstrap.Modal.getInstance(modalEl);
                 if (modal) modal.hide();
 
-                // Ricarica la lista dei servizi
                 loadMyServices(currentUserId);
             },
             error: function (xhr) {
@@ -117,7 +187,7 @@ $(document).ready(function () {
         $.ajax({
             url: `${SITTERS_API}/servizi/${idServizio}`,
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` },
+            //headers: { 'Authorization': `Bearer ${token}` },
             success: function (response) {
                 showDashboardAlert(response.message || 'Servizio eliminato', 'success');
                 loadMyServices(currentUserId);

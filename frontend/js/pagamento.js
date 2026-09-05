@@ -1,12 +1,14 @@
 $(document).ready(function () {
-    const token = localStorage.getItem('token');
+    // 1. Configurazione Base URL API e Verifica Autenticazione
+    const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : '';
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
-    // 1. Verifica Autenticazione
     if (!token) {
         window.location.href = "login.html";
         return;
     }
 
+    // Configura i parametri globali per le chiamate AJAX
     $.ajaxSetup({
         headers: {
             'Authorization': 'Bearer ' + token
@@ -28,12 +30,13 @@ $(document).ready(function () {
         return;
     }
 
-    let importoTotale = 0.00; // Valore di fallback
+    let importoTotale = 35.00; // Valore di default/fallback
 
     // 3. Caricamento Dettagli Prenotazione per il riepilogo
     $.ajax({
         url: `${API_BASE_URL}/prenotazioni/${idPrenotazione}`,
         method: 'GET',
+        dataType: 'json',
         success: function (data) {
             const p = Array.isArray(data) ? data[0] : data;
 
@@ -42,7 +45,7 @@ $(document).ready(function () {
                 return;
             }
 
-            const nomeSitter = `${p.nome_professionista || p.nome || 'Pet'} ${p.cognome_professionista || p.cognome || 'Sitter'}`;
+            const nomeSitter = `${p.nome_professionista || p.nome || 'Pet'} ${p.cognome_professionista || p.cognome || 'Sitter'}`.trim();
             const servizio = `${p.tipologia || 'Servizio'} (${p.tipo_animale || 'Pet'})`;
             const zona = p.zona || 'N.D.';
 
@@ -57,9 +60,9 @@ $(document).ready(function () {
                 orarioFormattato = `${dInizio.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })} - ${dFine.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
             }
 
-            const tariffa = parseFloat(p.tariffa || 30.00);
+            const tariffaBase = parseFloat(p.tariffa || 30.00);
             const commissioni = 5.00;
-            importoTotale = tariffa + commissioni;
+            importoTotale = tariffaBase + commissioni;
 
             $('#summarySitterName').text(nomeSitter);
             $('#summaryService').text(servizio);
@@ -68,9 +71,8 @@ $(document).ready(function () {
             $('#summaryZone').text(zona);
             $('#summaryTotal, #btnAmount').text(`€${importoTotale.toFixed(2)}`);
         },
-        error: function () {
-            // Se la GET fallisce continua permettendo comunque il pagamento con i dati statici
-            console.warn("Impossibile caricare i dettagli della prenotazione.");
+        error: function (xhr) {
+            console.warn("Impossibile caricare i dettagli della prenotazione. Si usano i dati standard.", xhr);
         }
     });
 
@@ -87,7 +89,7 @@ $(document).ready(function () {
         }
     });
 
-    // Formattazioni input
+    // Maschere di formattazione input
     $('#cardNumber').on('input', function () {
         let val = $(this).val().replace(/\D/g, '').substring(0, 16);
         $(this).val(val.replace(/(.{4})/g, '$1 ').trim());
@@ -127,11 +129,11 @@ $(document).ready(function () {
                 return;
             }
         } else {
-            // Per simulare PayPal con esito positivo passiamo un valore terminante con '6767'
-            numeroCartaVal = '0000000000006767';
+            numeroCartaVal = '4000000000006767';
         }
 
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Elaborazione in corso...');
+        // Blocco pulsante per evitare invi multipli durante la simulazione backend di 2 secondi
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Elaborazione pagamento in corso...');
 
         const payload = {
             id_prenotazione: parseInt(idPrenotazione),
@@ -141,15 +143,16 @@ $(document).ready(function () {
         };
 
         $.ajax({
-            url: '${API_BASE_URL}/pagamenti',
+            url: `${API_BASE_URL}/pagamenti`,
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: function (response) {
                 $alert.removeClass('d-none')
                       .addClass('alert-success')
-                      .html(`<i class="bi bi-check-circle-fill me-2"></i>${response.message || 'Pagamento completato con successo!'}`);
+                      .html(`<i class="bi bi-check-circle-fill me-2"></i>${response.message || 'Pagamento e prenotazione confermati!'}`);
 
+                // Reindirizzamento al profilo/dashboard utente dopo l'esito positivo
                 setTimeout(function () {
                     window.location.href = 'profilo.html';
                 }, 1800);
@@ -157,7 +160,11 @@ $(document).ready(function () {
             error: function (xhr) {
                 $btn.prop('disabled', false).html(`<i class="bi bi-lock-fill me-2"></i> Paga Ora <span id="btnAmount">€${importoTotale.toFixed(2)}</span>`);
 
-                const errorMsg = xhr.responseJSON?.error || xhr.responseJSON?.message || 'Errore durante l\'elaborazione del pagamento.';
+                let errorMsg = 'Errore durante l\'elaborazione del pagamento.';
+                if (xhr.responseJSON) {
+                    errorMsg = xhr.responseJSON.error || xhr.responseJSON.message || errorMsg;
+                }
+
                 $alert.removeClass('d-none')
                       .addClass('alert-danger')
                       .html(`<i class="bi bi-exclamation-triangle-fill me-2"></i>${errorMsg}`);
