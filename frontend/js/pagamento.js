@@ -1,6 +1,5 @@
+const API_BASE_URL = require('./config.js')
 $(document).ready(function () {
-    // 1. Configurazione Base URL API e Verifica Autenticazione
-    const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : '';
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
     if (!token) {
@@ -34,7 +33,7 @@ $(document).ready(function () {
 
     // 3. Caricamento Dettagli Prenotazione per il riepilogo
     $.ajax({
-        url: `${API_BASE_URL}/prenotazioni/${idPrenotazione}`,
+        url: `${API_BASE_URL}/bookings/${idPrenotazione}`,
         method: 'GET',
         dataType: 'json',
         success: function (data) {
@@ -107,7 +106,7 @@ $(document).ready(function () {
         $(this).val($(this).val().replace(/\D/g, ''));
     });
 
-    // 5. Invio Form e Chiamata POST /api/pagamenti
+    // 5. Invio Form e Chiamata POST /api/payment
     $('#paymentForm').on('submit', function (e) {
         e.preventDefault();
 
@@ -143,7 +142,7 @@ $(document).ready(function () {
         };
 
         $.ajax({
-            url: `${API_BASE_URL}/pagamenti`,
+            url: `${API_BASE_URL}/payment`,
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(payload),

@@ -1,3 +1,4 @@
+const API_BASE_URL = require('./config.js')
 $(document).ready(function () {
     // Carica le prenotazioni all'avvio o quando l'utente clicca sulla scheda Prenotazioni
     caricaPrenotazioni();
@@ -26,7 +27,7 @@ function caricaPrenotazioni() {
     }
 
     $.ajax({
-        url: `${API_BASE_URL}/prenotazioni`, // Modifica l'endpoint se la tua rotta ha un prefisso diverso
+        url: `${API_BASE_URL}/bookings/`, // Modifica l'endpoint se la tua rotta ha un prefisso diverso
         type: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
