@@ -21,7 +21,7 @@ describe('Unit Tests per reviewsHandler', () => {
     describe('createReview', () => {
         it('dovrebbe bloccare la recensione se la valutazione è fuori range (400 Bad Request)', async () => {
             req.user = { id: 1 };
-            req.body = { valutazione: 6, id_servizio: 10 }; // Valutazione non valida[cite: 46]
+            req.body = { valutazione: 6, id_servizio: 10 };
 
             await reviewsHandler.createReview(req, res);
 
@@ -34,7 +34,7 @@ describe('Unit Tests per reviewsHandler', () => {
             req.body = { valutazione: 5, commento: 'Ottimo!', id_servizio: 10 };
 
             // Simuliamo che il database NON trovi prenotazioni confermate per questo utente
-            db.query.mockResolvedValueOnce({ rowCount: 0 });[cite: 46]
+            db.query.mockResolvedValueOnce({ rowCount: 0 });
 
             await reviewsHandler.createReview(req, res);
 
@@ -47,9 +47,9 @@ describe('Unit Tests per reviewsHandler', () => {
             req.body = { valutazione: 5, commento: 'Ottimo!', id_servizio: 10 };
 
             // 1. Trovata prenotazione confermata
-            db.query.mockResolvedValueOnce({ rowCount: 1 });[cite: 46]
+            db.query.mockResolvedValueOnce({ rowCount: 1 });
             // 2. Creazione recensione
-            db.query.mockResolvedValueOnce({ rows: [{ id: 99, valutazione: 5 }] });[cite: 46]
+            db.query.mockResolvedValueOnce({ rows: [{ id: 99, valutazione: 5 }] });
 
             await reviewsHandler.createReview(req, res);
 
@@ -63,7 +63,7 @@ describe('Unit Tests per reviewsHandler', () => {
             req.user = { id: 1 };
             req.params.id = 99; // ID recensione
 
-            db.query.mockResolvedValueOnce({ rowCount: 1 });[cite: 46]
+            db.query.mockResolvedValueOnce({ rowCount: 1 });
 
             await reviewsHandler.deleteReview(req, res);
 
