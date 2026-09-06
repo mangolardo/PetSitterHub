@@ -1,0 +1,10 @@
+config:
+  target: 'http://localhost:3000' # Cambia 3000 se la tua porta Express è diversa
+  phases:
+    - duration: 30
+      arrivalRate: 20
+      name: "Picco estivo: 20 utenti al secondo per 30 secondi"
+scenarios:
+  - flow:
+    - get:
+        url: "/sitters"
