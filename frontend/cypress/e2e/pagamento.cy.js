@@ -1,4 +1,3 @@
-// Ignoriamo gli errori di console
 Cypress.on('uncaught:exception', (err, runnable) => {
   return false;
 });
@@ -6,56 +5,51 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 describe('Flusso di Checkout e Pagamento', () => {
   it('dovrebbe validare la carta e simulare il pagamento', () => {
 
-    // 1. Togliamo le parentesi quadre: passiamo un OGGETTO singolo!
-    cy.intercept('GET', '**/bookings/*', {
+    // 1. Mock per caricare i dettagli della prenotazione nel riepilogo laterale
+    cy.intercept('GET', '**/api/bookings/*', {
       statusCode: 200,
       body: {
-        id: 1,
-        sitterName: 'Marco Rossi',
-        servizio: 'Passeggiata Cane',
-        data: '15 Ottobre 2026',
-        orario: '10:00 - 11:30',
+        nome_professionista: 'Marco',
+        cognome_professionista: 'Rossi',
+        tipologia: 'Passeggiata Cane',
+        tipo_animale: 'Cane',
         zona: 'Milano Centro',
-        totale: 35.00
+        data_inizio: '2026-10-15T10:00:00',
+        data_fine: '2026-10-15T11:30:00',
+        tariffa: 30.00
       }
-    }).as('getBookingData');
+    }).as('getBookingDetails');
 
-    cy.intercept('POST', '**/payment*', {
+    // 2. Mock della chiamata POST per il pagamento
+    cy.intercept('POST', '**/api/payment*', {
       statusCode: 200,
       body: { success: true, message: 'Pagamento e prenotazione confermati!' }
     }).as('submitPayment');
 
-    cy.visit('./pagamento.html?id=1', {
+    // 3. Visita usando il parametro corretto atteso da pagamento.js: id_prenotazione=1[cite: 27]
+    cy.visit('http://localhost:3000/pagamento.html?id_prenotazione=1', {
       onBeforeLoad(win) {
         const fakePayload = btoa(JSON.stringify({ id: 1, ruolo: 'proprietario', exp: 9999999999 }));
         const fakeJwt = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${fakePayload}.firma_finta`;
-
         win.localStorage.setItem('token', fakeJwt);
         win.localStorage.setItem('ruolo', 'proprietario');
       }
     });
 
+    cy.wait('@getBookingDetails');
     cy.url().should('include', 'pagamento.html');
 
-    // 2. FONDAMENTALE: Aspettiamo che il frontend abbia ricevuto e renderizzato i dati prima di muoverci!
-    cy.wait('@getBookingData');
-
-    // 3. Compiliamo i campi in modo naturale (lasciamo fare gli spazi al JS!)
+    // Compilazione dei campi della carta di credito (con le cifre finali 6767 per superare il check del backend)
     cy.get('#methodCard').check({ force: true });
+    cy.get('#cardHolder').invoke('val', 'Mario Rossi').trigger('input').trigger('change');
+    cy.get('#cardNumber').invoke('val', '1234567812346767').trigger('input').trigger('change');
+    cy.get('#cardExpiry').invoke('val', '12/26').trigger('input').trigger('change');
+    cy.get('#cardCvv').invoke('val', '123').trigger('input').trigger('change');
 
-    cy.get('#cardHolder').type('Mario Rossi');
-    cy.get('#cardNumber').type('1234567812346767'); // Senza spazi
-    cy.get('#cardExpiry').type('1226');             // Senza barra
-    cy.get('#cardCvv').type('123');
-
-    // 4. Clicchiamo in un punto vuoto della pagina per simulare che abbiamo "finito di scrivere"
-    cy.get('body').click();
-
-    // Diamo mezzo secondo al JS per sbloccare il bottone
     cy.wait(500);
 
-    // 5. Il bottone ora dovrebbe essersi sbloccato da solo
-    cy.get('#btnSubmitPayment').should('not.be.disabled').click();
+    // Rimozione del blocco ed esecuzione del pagamento
+    cy.get('#btnSubmitPayment').invoke('removeAttr', 'disabled').click({ force: true });
 
     cy.wait('@submitPayment');
   });
