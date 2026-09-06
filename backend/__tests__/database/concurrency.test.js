@@ -1,3 +1,12 @@
+jest.mock('@google-cloud/cloud-sql-connector', () => ({
+    Connector: jest.fn().mockImplementation(() => ({
+        getOptions: jest.fn().mockResolvedValue({}),
+    })),
+}));
+jest.mock('../../../database/config', () => ({
+    query: jest.fn(),
+    connect: jest.fn()
+}));
 const db = require('../../../database/config');
 
 describe('Database Concurrency Tests', () => {
