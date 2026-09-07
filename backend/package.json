@@ -39,6 +39,9 @@
     "@parcel/watcher@2.6.0": true,
     "@scarf/scarf@1.4.0": true,
     "bcrypt@6.0.0": true,
-    "unrs-resolver@1.12.2": true
+    "unrs-resolver@1.12.2": true,
+    "@playwright/browser-chromium@1.62.1": true,
+    "protobufjs@7.6.6": true,
+    "unix-dgram@2.0.7": true
   }
 }
