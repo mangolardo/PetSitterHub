@@ -2,6 +2,7 @@
 $(document).ready(function () {
     $('button[data-bs-toggle="list"]').on('show.bs.tab', function () {
         $('#dashboard-tabs .list-group-item').removeClass('active');
+        const token = localStorage.getItem('token');
     });
 
     const SITTERS_API = `${API_BASE_URL}/sitters`;
@@ -18,7 +19,64 @@ $(document).ready(function () {
 
     // Carica profilo, servizi e recensioni all'avvio
     initDashboard();
+    $('#tab-prenotazioni-btn').on('click', function () {
+        loadMyBookings();
+    });
+    function loadMyBookings() {
+        const $tbody = $('#lista-prenotazioni');
+        $tbody.html('<tr><td colspan="5" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Caricamento prenotazioni...</td></tr>');
 
+        $.ajax({
+            url: `${API_BASE_URL}/bookings`,
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }, // Il token identifica l'ID utente (id_professionista)
+            success: function (prenotazioni) {
+                $tbody.empty();
+
+                if (!prenotazioni || prenotazioni.length === 0) {
+                    $tbody.html('<tr><td colspan="5" class="text-center py-4 text-muted">Nessuna prenotazione trovata.</td></tr>');
+                    return;
+                }
+
+                prenotazioni.forEach(function (prenotazione) {
+                    // Formattazione delle date
+                    const dInizio = new Date(prenotazione.data_inizio).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
+                    const dFine = new Date(prenotazione.data_fine).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
+
+                    // Gestione del cliente (Proprietario)
+                    const nomeCliente = `${prenotazione.nome_proprietario || ''} ${prenotazione.cognome_proprietario || ''}`.trim() || 'Cliente N.D.';
+
+                    // Gestione stato prenotazione per aggiungere badge colorati
+                    let badgeClass = 'bg-secondary';
+                    const stato = prenotazione.stato ? prenotazione.stato.toLowerCase() : '';
+                    if (stato === 'confermata' || stato === 'pagata') badgeClass = 'bg-success';
+                    else if (stato === 'in attesa' || stato === 'pending') badgeClass = 'bg-warning text-dark';
+                    else if (stato === 'annullata' || stato === 'cancellata') badgeClass = 'bg-danger';
+
+                    // Gestione Importo
+                    const importo = prenotazione.importo ? `€ ${parseFloat(prenotazione.importo).toFixed(2)}` : 'In attesa di pagamento';
+
+                    const row = `
+                        <tr>
+                            <td>
+                                <strong>${escapeHtml(nomeCliente)}</strong><br>
+                                <span class="badge ${badgeClass} mt-1">${escapeHtml(prenotazione.stato || 'Sconosciuto')}</span>
+                            </td>
+                            <td>${escapeHtml(prenotazione.nome_servizio || 'Servizio Generico')}</td>
+                            <td>${dInizio}</td>
+                            <td>${dFine}</td>
+                            <td class="fw-bold">${escapeHtml(importo)}</td>
+                        </tr>
+                    `;
+                    $tbody.append(row);
+                });
+            },
+            error: function (xhr) {
+                $tbody.html('<tr><td colspan="5" class="text-center py-4 text-danger">Errore nel caricamento delle prenotazioni.</td></tr>');
+                console.error("Impossibile caricare le prenotazioni del professionista:", xhr);
+            }
+        });
+    }
     function initDashboard() {
         $.ajax({
             url: `${API_BASE_URL}/auth/me`,

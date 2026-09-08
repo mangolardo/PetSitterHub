@@ -21,6 +21,41 @@ $(document).ready(function () {
     /**
      * Coordina le chiamate API
      */
+    $('#btn-start-chat').on('click', function () {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert("Devi accedere per poter contattare il pet sitter.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        const payload = {
+            id_ricevente: parseInt(idProfessionista)
+        };
+
+        const $btn = $(this);
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Apertura...');
+
+        $.ajax({
+            url: `${API_BASE_URL}/messages/`,
+            method: 'POST',
+            contentType: 'application/json',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            data: JSON.stringify(payload),
+            success: function (response) {
+                // Reindirizza al profilo con un parametro URL per indicare di aprire la tab della chat
+                window.location.href = 'profilo.html?tab=chat';
+            },
+            error: function (xhr) {
+                console.error("Errore durante la creazione della chat:", xhr);
+                alert("Si è verificato un errore nell'avvio della chat.");
+                $btn.prop('disabled', false).html('<i class="bi bi-chat-dots me-1"></i> Contatta');
+            }
+        });
+    });
     function loadAllSitterData(id) {
         $.when(
             fetchSitterDetails(id),

@@ -53,7 +53,7 @@ exports.getBookings = async (req, res) => {
         const ruolo = req.user.ruolo
         let { rows } = []
         let userResult = []
-        if (ruolo == "proprietario"){
+        if (ruolo === "proprietario"){
            userResult  = await db.query(
                 queries.FIND_PROP_ID,
                 [req.user.id]
@@ -67,7 +67,7 @@ exports.getBookings = async (req, res) => {
         if (userResult.rows.length === 0) {
             return res.status(401).json({error: 'Utente non trovato'})
         }
-        else if(ruolo == "proprietario")
+        else if(ruolo === "proprietario")
         { rows  = await db.query(queries.GET_PRENOTAZIONI_PROP, [idUtente]);}
         else  { rows  = await db.query(queries.GET_PRENOTAZIONI_PROF, [idUtente]);}
         res.status(200).json(rows.rows);
@@ -82,8 +82,25 @@ exports.getBooking = async (req, res) => {
         const idUtente = req.user.id;
         const idBooking = req.params.id
         const ruolo = req.user.ruolo
-        let { rows } = []
-        if (ruolo == "proprietario"){
+        let userResult = []
+        let rows = []
+
+       if(ruolo === "proprietario")
+        { rows  = await db.query(queries.GET_PRENOTAZIONE, [idUtente, idBooking]);}
+        else  { res.status(401).json({ error : 'non proprietario'})};
+        res.status(200).json(rows.rows);
+
+    } catch (error) {
+        console.error('Errore durante il recupero delle prenotazioni:', error);
+        res.status(500).json({ error: 'Errore interno del server durante la lettura delle prenotazioni' });
+    }
+   /* try {
+        const idUtente = req.user.id;
+        const idBooking = req.params.id
+        const ruolo = req.user.ruolo
+        let userResult = []
+        let rows = []
+        if (ruolo === "proprietario"){
             userResult  = await db.query(
                 queries.FIND_PROP_ID,
                 [req.user.id]
@@ -97,7 +114,7 @@ exports.getBooking = async (req, res) => {
         if (userResult.rows.length === 0) {
             return res.status(401).json({error: 'Utente non trovato'})
         }
-        else if(ruolo == "proprietario")
+        else if(ruolo === "proprietario")
         { rows  = await db.query(queries.GET_PRENOTAZIONE_PROP, [idUtente,idBooking]);}
         else  { rows  = await db.query(queries.GET_PRENOTAZIONE_PROF, [idUtente,idBooking]);}
         res.status(200).json(rows.rows);
@@ -105,7 +122,7 @@ exports.getBooking = async (req, res) => {
     } catch (error) {
         console.error('Errore durante il recupero delle prenotazioni:', error);
         res.status(500).json({ error: 'Errore interno del server durante la lettura delle prenotazioni' });
-    }
+    } */
 };
 
 //exports.payment = async(req,res) => {

@@ -54,8 +54,8 @@ function caricaPrenotazioni() {
                 const dataFine = p.data_fine ? new Date(p.data_fine).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : '-';
 
                 // Gestione dei campi restituite dalle query (ad es. tipologia servizio, controparte, importo/tariffa)
-                const servizio = p.tipologia_servizio || p.servizio || p.tipologia || 'Servizio';
-                const controparte = p.nome_controparte ? `${p.nome_controparte} ${p.cognome_controparte || ''}` : (p.professionista || p.proprietario || '-');
+                const servizio =  p.nome_servizio || 'Servizio';
+                const controparte =  p.nome_professionista + ' ' + p.cognome_professionista || '-';
                 const importo = p.importo || p.tariffa ? `€ ${parseFloat(p.importo || p.tariffa).toFixed(2)}` : '-';
 
                 // Badge opzionale per lo stato della prenotazione

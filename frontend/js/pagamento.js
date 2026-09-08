@@ -37,6 +37,7 @@ $(document).ready(function () {
         method: 'GET',
         dataType: 'json',
         success: function (data) {
+            // Gestisce sia il caso in cui venga restituito un array sia un oggetto singolo
             const p = Array.isArray(data) ? data[0] : data;
 
             if (!p) {
@@ -57,12 +58,17 @@ $(document).ready(function () {
 
                 dataFormattata = dInizio.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
                 orarioFormattato = `${dInizio.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })} - ${dFine.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
+
+                const differenzaMs = dFine - dInizio;
+                oreServizio = Math.max(1, differenzaMs / (1000 * 60 * 60)); // Minimo 1 ora di default
             }
 
             const tariffaBase = parseFloat(p.tariffa || 30.00);
+            const costoServizio = tariffaBase * oreServizio;
             const commissioni = 5.00;
-            importoTotale = tariffaBase + commissioni;
-
+            importoTotale = costoServizio + commissioni;
+            $('#serviceRate').text(`€${tariffaBase.toFixed(2)}`);
+            $('#serviceFee').text(`€${commissioni.toFixed(2)}`);
             $('#summarySitterName').text(nomeSitter);
             $('#summaryService').text(servizio);
             $('#summaryDate').text(dataFormattata);
