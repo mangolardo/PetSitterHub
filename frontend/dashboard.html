@@ -436,10 +436,17 @@
                         <label for="disp-fine-input" class="form-label fw-semibold">Data e Ora Fine</label>
                         <input type="datetime-local" class="form-control" id="disp-fine-input" required>
                     </div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-green rounded-pill" data-bs-dismiss="modal">Annulla</button>
-                    <button type="submit" class="btn btn-coral rounded-pill px-4">Salva Disponibilità</button>
+
+                    <!-- NUOVI CAMPI: OPZIONI DI RIPETIZIONE -->
+                    <div class="form-check form-switch mb-3 mt-4">
+                        <input class="form-check-input" type="checkbox" id="disp-ripeti-checkbox" style="cursor: pointer;">
+                        <label class="form-check-label fw-bold" for="disp-ripeti-checkbox" style="cursor: pointer;">Ripeti ogni settimana</label>
+                    </div>
+
+                    <div class="mb-2 d-none" id="container-fine-ripetizione">
+                        <label for="disp-fine-ripetizione-input" class="form-label fw-semibold text-muted">Fino al giorno:</label>
+                        <input type="date" class="form-control" id="disp-fine-ripetizione-input">
+                    </div>
                 </div>
             </form>
         </div>
