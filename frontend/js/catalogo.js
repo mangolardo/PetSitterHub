@@ -1,4 +1,3 @@
-//const API_BASE_URL = typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : 'http://localhost:3000/api';
 $(document).ready(function () {
     // Helper per evitare attacchi XSS
     function escapeHtml(text) {
@@ -10,6 +9,68 @@ $(document).ready(function () {
     let zona = urlParams.get('zona') || '';
     let servizio = urlParams.get('servizio') || '';
     let tipoAnimale = urlParams.get('tipo_animale') || urlParams.get('animale') || '';
+
+    let allZones = [];
+    loadAvailableZones();
+
+    function loadAvailableZones() {
+        $.ajax({
+            url: `${API_BASE_URL}/services/zones`,
+            method: 'GET',
+            dataType: 'json',
+            success: function (zones) {
+                if (Array.isArray(zones)) {
+                    allZones = zones.map(item => (item !== null && typeof item === 'object') ? item.zona : item)
+                        .filter(z => z && typeof z === 'string');
+                }
+            },
+            error: function (err) {
+                console.warn("Impossibile caricare l'elenco delle zone attive:", err);
+            }
+        });
+    }
+
+    // Gestione della digitazione e filtraggio parziale (non case-sensitive) per la zona
+    $('#filterZona').on('input', function () {
+        const query = $(this).val().toLowerCase().trim();
+        const $dropdown = $('#zones-dropdown');
+
+        $(this).removeClass('is-invalid');
+
+        if (query.length === 0) {
+            $dropdown.hide().empty();
+            return;
+        }
+
+        const filteredZones = allZones.filter(z => z.toLowerCase().includes(query));
+
+        $dropdown.empty();
+        if (filteredZones.length > 0) {
+            filteredZones.forEach(z => {
+                $dropdown.append(`
+                    <li><a class="dropdown-item py-2 px-3 zone-option" href="#" data-value="${z}">${z}</a></li>
+                `);
+            });
+            $dropdown.show();
+        } else {
+            $dropdown.hide();
+        }
+    });
+
+    // Selezione di una zona dal menu a tendina
+    $(document).on('click', '.zone-option', function (e) {
+        e.preventDefault();
+        const selectedZone = $(this).data('value');
+        $('#filterZona').val(selectedZone);
+        $('#zones-dropdown').hide().empty();
+    });
+
+    // Chiude il dropdown se si clicca al di fuori
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#filterZona, #zones-dropdown').length) {
+            $('#zones-dropdown').hide();
+        }
+    });
 
     function getServiceIcon(tipologia) {
         const tipo = (tipologia || '').trim();
@@ -146,7 +207,6 @@ $(document).ready(function () {
     // Caricamento iniziale
     loadSitters(zona, servizio, tipoAnimale);
 
-
     // Gestione invio modulo di ricerca
     $("#catalogSearchForm").on("submit", function (e) {
         e.preventDefault();
@@ -154,12 +214,14 @@ $(document).ready(function () {
         const newServizio = $("#filterServizio").val();
         const newAnimale = $("#filterAnimale").val();
 
+        $('#zones-dropdown').hide();
         loadSitters(newZona, newServizio, newAnimale);
     });
 
     // Gestione pulsante Reset
     $("#btnResetFilters").on("click", function () {
         $("#catalogSearchForm")[0].reset();
+        $('#zones-dropdown').hide().empty();
         loadSitters('', '', '');
     });
 });

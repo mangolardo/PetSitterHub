@@ -63,7 +63,7 @@ $(document).ready(function () {
      * 2. RENDERING DEI DATI DEL SERVIZIO
      */
     function renderServiceData(data) {
-        const serviceId = data.id || data.id_servizio || idServizio;
+        const serviceId =  data.id_servizio || idServizio;
 
         // Estrazione singola e sicura dell'ID del professionista
         const idProfessionista = data.id_professionista || data.id_sitter;
@@ -96,8 +96,8 @@ $(document).ready(function () {
         $("#detailContent").removeClass("d-none");
 
         // CARICAMENTO RECENSIONI
-        if (idProfessionista) {
-            loadReviews(idProfessionista);
+        if (idServizio) {
+            loadReviews(idServizio);
         } else {
             renderReviews([]);
         }
@@ -108,7 +108,7 @@ $(document).ready(function () {
      */
     function loadReviews(idProfessionista) {
         $.ajax({
-            url: `${API_BASE_URL}/reviews/${idProfessionista}`,
+            url: `${API_BASE_URL}/reviews/service/${idServizio}`,
             method: 'GET',
             dataType: 'json',
             success: function (recensioni) {

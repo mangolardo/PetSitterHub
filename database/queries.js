@@ -10,10 +10,26 @@ module.exports = {
     FIND_PROF_ID: 'SELECT id, nome, cognome, email, data_registrazione FROM professionista WHERE id = $1',
     GET_PROF_ID: 'SELECT id, nome, cognome, data_registrazione FROM professionista WHERE id = $1',
 
-    GET_CAT_PROF_SERVIZIO: `SELECT P.id, nome, zona, tipologia, tariffa , tipo_animale  FROM professionista as P join servizio on P.id = id_professionista where zona = $1 AND tipologia = $2 `,
-    GET_CAT_PROF_AN_SERV: `SELECT P.id, nome, zona, tipologia, tariffa , tipo_animale  FROM professionista as P  join servizio on P.id = id_professionista where zona = $1 AND tipologia = $2 AND tipo_animale = $3`,
-    GET_CAT_PROF_ANIMALE: `SELECT P.id, nome, zona, tipologia, tariffa , tipo_animale  FROM professionista as P  join servizio on P.id = id_professionista where zona = $1 AND tipo_animale = $3`,
-    GET_CAT_PROF: `SELECT P.id, nome, zona, tipologia, tariffa , tipo_animale  FROM professionista as P join servizio on P.id = id_professionista where zona = $1  `,
+    GET_CAT : `
+            SELECT 
+                s.id AS id_servizio,
+                s.tipologia,
+                s.tipo_animale,
+                s.tariffa,
+                s.zona,
+                p.id AS id_professionista,
+                p.nome AS nome_professionista,
+                p.cognome AS cognome_professionista,
+                ROUND(AVG(r.valutazione), 1) AS valutazione_media
+            FROM servizio s
+            JOIN professionista p ON s.id_professionista = p.id
+            LEFT JOIN recensione r ON s.id = r.id_servizio
+            WHERE 1=1
+        `,
+ //   GET_CAT_PROF_SERVIZIO: `SELECT S.id, P.nome, S.zona, S.tipologia, S.tariffa , S.tipo_animale  FROM professionista as P join servizio as S on P.id = S.id_professionista where zona = $1 AND tipologia = $2 `,
+  //  GET_CAT_PROF_AN_SERV: `SELECT S.id, P.nome, S.zona, S.tipologia, S.tariffa , S.tipo_animale  FROM professionista as P  join servizio as S on P.id = S.id_professionista where zona = $1 AND tipologia = $2 AND tipo_animale = $3`,
+  //  GET_CAT_PROF_ANIMALE: `SELECT S.id, P.nome, S.zona, S.tipologia, S.tariffa , S.tipo_animale  FROM professionista as P  join servizio as S on P.id = S.id_professionista where zona = $1 AND tipo_animale = $3`,
+//    GET_CAT_PROF: `SELECT  S.id, P.nome, S.zona, S.tipologia, S.tariffa , S.tipo_animale  FROM professionista as P join servizio as S on P.id = S.id_professionista where zona = $1  `,
     GET_SERVIZI: 'SELECT id, tipologia, tariffa, tipo_animale, zona from servizio where id_professionista = $1',
     GET_DISP : 'SELECT id,data_inizio,data_fine,is_disponibile from disponibilita where id_servizio = $1',
     CHECK_SERVICE_OWNERSHIP: `SELECT id FROM servizio WHERE id = $1 AND id_professionista = $2`,
