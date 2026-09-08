@@ -164,31 +164,25 @@
 
                                 <!-- Località -->
 
-                                <div class="col-md-5">
-
-                                    <label
-                                            for="location-input"
-                                            class="visually-hidden">
-
-                                        Località
-
-                                    </label>
-
+                                <div class="col-md-5 position-relative">
+                                    <label for="location-input" class="visually-hidden">Località</label>
                                     <div class="input-group">
-
                                     <span class="input-group-text">
                                         <i class="bi bi-geo-alt"></i>
                                     </span>
-
                                         <input
                                                 type="text"
                                                 id="location-input"
                                                 name="zona"
                                                 class="form-control"
-                                                placeholder="Es. Milano">
-
+                                                placeholder="Es. Milano"
+                                                autocomplete="off"
+                                                required>
                                     </div>
-
+                                    <!-- Lista dei suggerimenti personalizzata -->
+                                    <ul id="zones-dropdown" class="dropdown-menu w-100 shadow-sm border-0 rounded-3 mt-1" style="max-height: 200px; overflow-y: auto; display: none; position: absolute; z-index: 1000;">
+                                        <!-- Verrà popolata dinamicamente via JS -->
+                                    </ul>
                                 </div>
 
 
@@ -213,20 +207,24 @@
                                             Tutti i servizi
                                         </option>
 
-                                        <option value="passeggiate">
-                                            Passeggiate
+                                        <option value="Passeggiata">
+                                            Passeggiata
                                         </option>
 
-                                        <option value="pet-sitting">
+                                        <option value="Pet-sitting">
                                             Pet-sitting
                                         </option>
 
-                                        <option value="pensione">
+                                        <option value="Pensione">
                                             Pensione
                                         </option>
 
-                                        <option value="toelettatura">
+                                        <option value="Toelettatura">
                                             Toelettatura
+                                        </option>
+
+                                        <option value="Addestramento">
+                                            Addestramento
                                         </option>
 
                                     </select>
@@ -394,333 +392,26 @@
 
     <!-- PROFESSIONISTI -->
 
-    <section id="professionisti"
-             class="sitters-section">
-
+    <section id="professionisti" class="sitters-section">
         <div class="container">
-
             <div class="section-heading">
-
                 <div>
-
-                    <p class="section-eyebrow">
-                        I nostri professionisti
-                    </p>
-
-                    <h2>
-                        Trova il tuo pet-sitter
-                    </h2>
-
+                    <p class="section-eyebrow">I nostri professionisti</p>
+                    <h2>I migliori pet-sitter</h2>
                 </div>
-
-                <p>
-                    Persone affidabili, selezionate
-                    per prendersi cura dei tuoi animali.
-                </p>
-
+                <p>Persone affidabili, selezionate e con le migliori valutazioni.</p>
             </div>
 
-
-            <div id="sitter-grid"
-                 class="row g-4">
-
-
-                <!-- SITTER 1 -->
-
-                <div class="col-md-6 col-xl-4 sitter-wrapper">
-
-                    <article
-                            class="sitter-card"
-                            data-zone="milano"
-                            data-services="passeggiate,pet-sitting">
-
-                        <div class="sitter-top">
-
-                        <span class="verified-badge">
-
-                            <i class="bi bi-shield-check"></i>
-
-                            Verificato
-
-                        </span>
-
-                            <i class="bi bi-heart-fill sitter-icon"></i>
-
-                        </div>
-
-
-                        <div class="sitter-body">
-
-                            <div class="d-flex justify-content-between">
-
-                                <div>
-
-                                    <h3>
-                                        Giulia Rossi
-                                    </h3>
-
-                                    <p class="zone">
-                                        <i class="bi bi-geo-alt"></i>
-                                        Milano
-                                    </p>
-
-                                </div>
-
-                                <span class="rating">
-
-                                <i class="bi bi-star-fill"></i>
-                                4.9
-
-                            </span>
-
-                            </div>
-
-
-                            <p class="services">
-                                Passeggiate e pet-sitting
-                                per cani e gatti.
-                            </p>
-
-
-                            <div class="sitter-footer">
-
-                                <strong>
-                                    €15 / ora
-                                </strong>
-
-                                <button
-                                        class="availability-toggle btn btn-sm"
-                                        type="button"
-                                        aria-expanded="false">
-
-                                    Disponibilità
-
-                                </button>
-
-                            </div>
-
-
-                            <div class="availability-panel">
-
-                                <p>
-                                    <i class="bi bi-calendar-check"></i>
-                                    Disponibile dal lunedì al venerdì.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </article>
-
-                </div>
-
-
-                <!-- SITTER 2 -->
-
-                <div class="col-md-6 col-xl-4 sitter-wrapper">
-
-                    <article
-                            class="sitter-card"
-                            data-zone="bologna"
-                            data-services="pensione,pet-sitting">
-
-                        <div class="sitter-top">
-
-                        <span class="verified-badge">
-
-                            <i class="bi bi-shield-check"></i>
-
-                            Verificato
-
-                        </span>
-
-                            <i class="bi bi-house-heart sitter-icon"></i>
-
-                        </div>
-
-
-                        <div class="sitter-body">
-
-                            <div class="d-flex justify-content-between">
-
-                                <div>
-
-                                    <h3>
-                                        Marco Bianchi
-                                    </h3>
-
-                                    <p class="zone">
-                                        <i class="bi bi-geo-alt"></i>
-                                        Bologna
-                                    </p>
-
-                                </div>
-
-                                <span class="rating">
-
-                                <i class="bi bi-star-fill"></i>
-                                4.8
-
-                            </span>
-
-                            </div>
-
-
-                            <p class="services">
-                                Pensione e pet-sitting
-                                direttamente a casa mia.
-                            </p>
-
-
-                            <div class="sitter-footer">
-
-                                <strong>
-                                    €20 / giorno
-                                </strong>
-
-                                <button
-                                        class="availability-toggle btn btn-sm"
-                                        type="button"
-                                        aria-expanded="false">
-
-                                    Disponibilità
-
-                                </button>
-
-                            </div>
-
-
-                            <div class="availability-panel">
-
-                                <p>
-                                    <i class="bi bi-calendar-check"></i>
-                                    Disponibile nei weekend.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </article>
-
-                </div>
-
-
-                <!-- SITTER 3 -->
-
-                <div class="col-md-6 col-xl-4 sitter-wrapper">
-
-                    <article
-                            class="sitter-card"
-                            data-zone="torino"
-                            data-services="passeggiate,toelettatura">
-
-                        <div class="sitter-top">
-
-                        <span class="verified-badge">
-
-                            <i class="bi bi-shield-check"></i>
-
-                            Verificato
-
-                        </span>
-
-                            <i class="bi bi-scissors sitter-icon"></i>
-
-                        </div>
-
-
-                        <div class="sitter-body">
-
-                            <div class="d-flex justify-content-between">
-
-                                <div>
-
-                                    <h3>
-                                        Elena Verdi
-                                    </h3>
-
-                                    <p class="zone">
-                                        <i class="bi bi-geo-alt"></i>
-                                        Torino
-                                    </p>
-
-                                </div>
-
-                                <span class="rating">
-
-                                <i class="bi bi-star-fill"></i>
-                                5.0
-
-                            </span>
-
-                            </div>
-
-
-                            <p class="services">
-                                Passeggiate e servizi
-                                di toelettatura.
-                            </p>
-
-
-                            <div class="sitter-footer">
-
-                                <strong>
-                                    €18 / ora
-                                </strong>
-
-                                <button
-                                        class="availability-toggle btn btn-sm"
-                                        type="button"
-                                        aria-expanded="false">
-
-                                    Disponibilità
-
-                                </button>
-
-                            </div>
-
-
-                            <div class="availability-panel">
-
-                                <p>
-                                    <i class="bi bi-calendar-check"></i>
-                                    Disponibile tutti i giorni.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </article>
-
-                </div>
-
+            <div id="sitter-grid" class="row g-4">
+                <!-- I 3 migliori sitter verranno inseriti qui dinamicamente via JS -->
             </div>
-
 
             <!-- Nessun risultato -->
-
-            <div
-                    id="empty-results"
-                    class="empty-results d-none">
-
+            <div id="empty-results" class="empty-results d-none">
                 <i class="bi bi-search"></i>
-
-                <p>
-                    Nessun professionista corrisponde
-                    alla ricerca.
-                </p>
-
-                <small>
-                    Prova a modificare zona o servizio.
-                </small>
-
+                <p>Nessun professionista disponibile al momento.</p>
             </div>
-
         </div>
-
     </section>
 
 
@@ -771,19 +462,7 @@
 </script>
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
-
-<!-- JavaScript  -->
-<script src="/js/script.js"></script>
-<script>
-    $(document).ready(function() {
-        if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
-            $("#nav-auth-container").html(`
-                <a href="profilo.html" class="btn btn-outline-green rounded-pill px-3 me-2">Profilo</a>
-                <button id="logout-button" class="btn btn-coral rounded-pill px-3">Esci</button>
-            `);
-        }
-    });
-</script>
+<script src="js/index.js"></script>
 </body>
 </html>
 ```
