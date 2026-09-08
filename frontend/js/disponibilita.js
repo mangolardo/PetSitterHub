@@ -35,6 +35,17 @@ $(document).ready(async function () {
     // Gestione invio form creazione nuova disponibilità
     $('#form-crea-disponibilita').on('submit', handleAddAvailability);
 
+    // Gestione visualizzazione dinamica della casella "Ripeti"
+    $('#disp-ripeti-checkbox').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#container-fine-ripetizione').removeClass('d-none');
+            $('#disp-fine-ripetizione-input').prop('required', true);
+        } else {
+            $('#container-fine-ripetizione').addClass('d-none');
+            $('#disp-fine-ripetizione-input').prop('required', false).val('');
+        }
+    });
+
     // Gestione eliminazione dalla modale di dettaglio
     $('#btn-elimina-disponibilita').on('click', handleEliminaDaModale);
 
@@ -133,7 +144,6 @@ function initMainCalendar(id) {
             openCreateModal(info.startStr, info.endStr);
         },
 
-        // MODIFICATO: Apre la modale di dettaglio anziché deleteAvailability()
         eventClick: function (info) {
             showDetailModal(info.event);
         },
@@ -236,6 +246,10 @@ async function handleAddAvailability(e) {
     const dataInizio = $('#disp-inizio-input').val();
     const dataFine = $('#disp-fine-input').val();
 
+    // Nuovi campi per la ripetizione
+    const isRicorsivo = $('#disp-ripeti-checkbox').is(':checked');
+    const dataFineRipetizione = $('#disp-fine-ripetizione-input').val();
+
     if (!idServizio) {
         alert('Seleziona prima un servizio.');
         return;
@@ -246,42 +260,73 @@ async function handleAddAvailability(e) {
         return;
     }
 
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/availabilities/${idServizio}`, {
+    const token = localStorage.getItem('token');
+    const richiesteFetch = [];
+
+    let startCorrente = new Date(dataInizio);
+    let endCorrente = new Date(dataFine);
+    let limiteData = isRicorsivo && dataFineRipetizione ? new Date(dataFineRipetizione) : startCorrente;
+
+    // Impostiamo l'orario del limite a fine giornata per includere correttamente l'ultimo giorno
+    limiteData.setHours(23, 59, 59);
+
+    // Ciclo: crea una richiesta per la data attuale, poi aggiunge 7 giorni
+    while (startCorrente <= limiteData) {
+
+        const richiesta = fetch(`${API_BASE_URL}/availabilities/${idServizio}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-                data_inizio: dataInizio,
-                data_fine: dataFine
+                data_inizio: startCorrente.toISOString(),
+                data_fine: endCorrente.toISOString()
             })
         });
 
-        const data = await response.json();
+        richiesteFetch.push(richiesta);
 
-        if (!response.ok) {
-            throw new Error(data.error || 'Errore durante l\'aggiunta della disponibilità.');
+        if (!isRicorsivo) break;
+
+        // Aggiungi 7 giorni per la prossima iterazione
+        startCorrente.setDate(startCorrente.getDate() + 7);
+        endCorrente.setDate(endCorrente.getDate() + 7);
+    }
+
+    try {
+        // Disabilita il pulsante di submit
+        $('#form-crea-disponibilita button[type="submit"]').prop('disabled', true).text('Salvataggio...');
+
+        // Eseguiamo tutte le chiamate POST in parallelo
+        const risposte = await Promise.all(richiesteFetch);
+
+        for (let res of risposte) {
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || "Errore nel salvataggio di uno degli slot.");
+            }
         }
 
         const modalEl = document.getElementById('modalCreaDisponibilita');
         const modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
+
+        // Resetta il form e la UI
         $('#form-crea-disponibilita')[0].reset();
+        $('#disp-ripeti-checkbox').prop('checked', false);
+        $('#container-fine-ripetizione').addClass('d-none');
 
-        if (calendarInstance) {
-            calendarInstance.refetchEvents();
-        }
-        if (modalCalendarInstance) {
-            modalCalendarInstance.refetchEvents();
-        }
+        if (calendarInstance) calendarInstance.refetchEvents();
+        if (modalCalendarInstance) modalCalendarInstance.refetchEvents();
 
-        showAlert('Disponibilità salvata con successo!', 'success');
+        showAlert('Disponibilità salvate con successo!', 'success');
     } catch (error) {
         console.error('Errore addAvailability:', error);
         alert(error.message);
+    } finally {
+        // Riattiva il pulsante
+        $('#form-crea-disponibilita button[type="submit"]').prop('disabled', false).text('Salva Disponibilità');
     }
 }
 
@@ -354,7 +399,6 @@ function openModalForService(idServizio, titoloServizio) {
             $('#disp-servizio-select').val(idServizio);
             openCreateModal(info.startStr, info.endStr);
         },
-        // MODIFICATO: Apre la modale di dettaglio anche dal calendario interno al modale servizio
         eventClick: function (info) {
             showDetailModal(info.event);
         },
