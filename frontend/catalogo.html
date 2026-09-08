@@ -64,27 +64,20 @@
                 </div>
             </div>
         </div>
-
-        <!-- Griglia Dinamica dei Risultati -->
-        <div id="catalog-grid" class="row g-4">
-            <!-- I risultati verranno inseriti qui via AJAX da jQuery -->
-            <div class="col-12 text-center py-5">
-                <div class="spinner-border text-success" role="status">
-                    <span class="visually-hidden">Caricamento...</span>
-                </div>
-                <p class="text-muted mt-2">Ricerca in corso...</p>
-            </div>
-        </div>
         <!-- CONTENITORE DI RICERCA INTERNO -->
         <div class="search-box mb-5">
             <form id="catalogSearchForm" class="row g-2 align-items-center">
 
                 <!-- Input Zona -->
-                <div class="col-12 col-md-4 col-lg-3">
+                <div class="col-12 col-md-4 col-lg-3 position-relative">
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                        <input type="text" id="filterZona" class="form-control" placeholder="Inserisci zona o città..." aria-label="Zona">
+                        <input type="text" id="filterZona" class="form-control" placeholder="Inserisci zona o città..." aria-label="Zona" autocomplete="off">
                     </div>
+                    <!-- Lista dei suggerimenti personalizzata -->
+                    <ul id="zones-dropdown" class="dropdown-menu w-100 shadow-sm border-0 rounded-3 mt-1" style="max-height: 200px; overflow-y: auto; display: none; position: absolute; z-index: 1000;">
+                        <!-- Verrà popolata dinamicamente via JS -->
+                    </ul>
                 </div>
 
                 <!-- Select Servizio -->
@@ -94,9 +87,9 @@
                         <select id="filterServizio" class="form-select" aria-label="Servizio">
                             <option value="">Tutti i servizi</option>
                             <option value="Passeggiata">Passeggiata</option>
-                            <option value="Pet-sitter">Pet-sitter</option>
+                            <option value="Pet-sitting">Pet-sitting</option>
                             <option value="Addestramento">Addestramento</option>
-                            <option value="Pensione">Pensione casalinga</option>
+                            <option value="Pensione">Pensione </option>
                             <option value="Toelettatura">Toelettatura</option>
                         </select>
                     </div>
@@ -127,6 +120,17 @@
 
             </form>
         </div>
+        <!-- Griglia Dinamica dei Risultati -->
+        <div id="catalog-grid" class="row g-4">
+            <!-- I risultati verranno inseriti qui via AJAX da jQuery -->
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Caricamento...</span>
+                </div>
+                <p class="text-muted mt-2">Ricerca in corso...</p>
+            </div>
+        </div>
+
         <!-- Messaggio Nessun Risultato (Nascosto di default) -->
         <div id="catalog-empty" class="empty-results d-none text-center py-5">
             <i class="bi bi-search display-4 text-muted mb-3"></i>

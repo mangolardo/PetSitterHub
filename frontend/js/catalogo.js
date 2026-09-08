@@ -11,6 +11,16 @@ $(document).ready(function () {
     let servizio = urlParams.get('servizio') || '';
     let tipoAnimale = urlParams.get('tipo_animale') || urlParams.get('animale') || '';
 
+    function getServiceIcon(tipologia) {
+        const tipo = (tipologia || '').trim();
+        if (tipo.includes('Passeggiata')) return 'bi-heart-fill';
+        if (tipo.includes('Pet Sitting')) return 'bi-house-heart';
+        if (tipo.includes('Pensione')) return 'bi-building-heart';
+        if (tipo.includes('Toelettatura')) return 'bi-scissors';
+        if (tipo.includes('Addestramento')) return 'bi-award-fill';
+        return 'bi-shield-check'; // Icona di default
+    }
+
     // Popola i campi del form con i parametri correnti (se presenti)
     $('#filterZona').val(zona);
     $('#filterServizio').val(servizio);
@@ -19,6 +29,7 @@ $(document).ready(function () {
     // Funzione principale per caricare i dati via AJAX
     function loadSitters(pZona, pServizio, pAnimale) {
         // Aggiorna il testo dei filtri attivi
+
         let filterDesc = [];
         if (pZona) filterDesc.push(`Zona: <strong>${escapeHtml(pZona)}</strong>`);
         if (pServizio) filterDesc.push(`Servizio: <strong>${escapeHtml(pServizio)}</strong>`);
@@ -37,6 +48,7 @@ $(document).ready(function () {
         if (pAnimale) {
             queryParams.animale = pAnimale;
         }
+
 
         // Mostra il caricamento prima della chiamata
         $("#catalog-empty").addClass("d-none");
@@ -67,23 +79,24 @@ $(document).ready(function () {
                     const nome = item.nome_professionista || item.nome || 'Pet Sitter';
                     const cognome = item.cognome_professionista || item.cognome || '';
                     const itemZona = item.zona || 'Non specificata';
-                    const valutazione = item.valutazione_media || item.voto || '5.0';
+                    const valutazione = item.valutazione_media || item.voto || '-';
                     const tipologia = item.tipologia || item.servizio || 'Servizio Pet';
                     const animale = item.tipo_animale || item.animale || 'Tutti';
                     const tariffa = item.tariffa ? parseFloat(item.tariffa).toFixed(2) : '0.00';
                     const idServizio = item.id_servizio || item.id || '';
+                    let icon = getServiceIcon(tipologia)
 
                     $grid.append(`
-                        <div class="col-md-6 col-xl-4">
-                            <article class="sitter-card h-100 shadow-sm">
+                        <div class="col-md-6 col-xl-4 d-flex">
+                            <article class="sitter-card w-100 shadow-sm d-flex flex-column justify-content-between">
                                 <div class="sitter-top">
                                     <span class="verified-badge">
                                         <i class="bi bi-shield-check"></i> Verificato
                                     </span>
-                                    <i class="bi bi-heart-fill sitter-icon"></i>
+                                    <i class="bi ${icon} sitter-icon"></i>
                                 </div>
-                                <div class="sitter-body d-flex flex-column justify-content-between h-100">
-                                    <div>
+                                <div class="sitter-body d-flex flex-column flex-grow-1 p-4">
+                                    <div class="flex-grow-1">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div>
                                                 <h3 class="h5 mb-1">${escapeHtml(nome)} ${escapeHtml(cognome)}</h3>
@@ -100,14 +113,14 @@ $(document).ready(function () {
                                         </p>
                                     </div>
 
-                                    <div class="sitter-footer mt-4 pt-3 border-top d-flex align-items-center justify-content-between">
+                                    <div class="sitter-footer mt-auto pt-3 border-top d-flex align-items-center justify-content-between">
                                         <div>
                                             <small class="text-muted d-block" style="font-size: 0.75rem;">Tariffa</small>
                                             <strong class="text-success fs-5">€${tariffa}</strong>
                                         </div>
                                         <a href="dettaglio-servizio.html?id_servizio=${idServizio}" class="btn btn-outline-coral btn-sm rounded-pill px-3">
                                           Vedi dettagli
-                                         </a>
+                                        </a>
                                     </div>
                                 </div>
                             </article>
@@ -132,6 +145,7 @@ $(document).ready(function () {
 
     // Caricamento iniziale
     loadSitters(zona, servizio, tipoAnimale);
+
 
     // Gestione invio modulo di ricerca
     $("#catalogSearchForm").on("submit", function (e) {
