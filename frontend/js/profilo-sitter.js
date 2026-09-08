@@ -84,9 +84,26 @@ $(document).ready(function () {
      * Rendering delle informazioni personali del Pet Sitter
      */
     function renderSitterInfo(data) {
-        const nomeCompleto = `${data.nome || ''} ${data.cognome || ''}`.trim() || "Pet Sitter";
+        // Gestione separata o combinata di nome e cognome
+        const nome = data.nome || '';
+        const cognome = data.cognome || '';
+        const nomeCompleto = `${nome} ${cognome}`.trim() || "Pet Sitter";
+
         $("#sitterFullName").text(nomeCompleto);
         $("#sitterCity").text(data.zona || data.citta || "Zona non specificata");
+
+        // Formattazione della data di registrazione (es. data_creazione, created_at o data_registrazione)
+        const rawDate = data.data_registrazione || data.created_at || data.data_creazione;
+        if (rawDate) {
+            const dataFormattata = new Date(rawDate).toLocaleDateString('it-IT', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            $("#sitterDataRegistrazione").text(dataFormattata);
+        } else {
+            $("#sitterDataRegistrazione").text("Data non disponibile");
+        }
 
         if (data.bio) {
             $("#sitterBio").text(data.bio);
@@ -125,7 +142,6 @@ $(document).ready(function () {
                                 <span class="fw-bold fs-5 text-success">€${tariffa}</span>
                             </div>
                             <h6 class="fw-bold">${escapeHtml(s.tipologia || 'Servizio')} - ${escapeHtml(s.tipo_animale || 'Pet')}</h6>
-                            <p class="text-muted small mb-2">${escapeHtml(s.descrizione || 'Nessuna descrizione fornita.')}</p>
                         </div>
                         <a href="prenotazione.html?id_servizio=${serviceId}" class="btn btn-sm btn-outline-primary mt-2 w-100">
                             Prenota ora
@@ -144,8 +160,8 @@ $(document).ready(function () {
         $reviewsList.empty();
 
         if (!recensioni || recensioni.length === 0) {
-            $("#sitterRating").text("N/D");
-            $("#sitterReviewsCount").text("(0 recensioni)");
+            $("#sitterRatingMedia").text("N/D");
+            $("#sitterReviewsTotal").text("(0 recensioni)");
             $reviewsList.append(`
                 <p class="text-muted text-center py-3 mb-0">Nessuna recensione ancora ricevuta.</p>
             `);
@@ -156,8 +172,8 @@ $(document).ready(function () {
         const totale = recensioni.reduce((sum, r) => sum + parseInt(r.valutazione || 0), 0);
         const media = (totale / recensioni.length).toFixed(1);
 
-        $("#sitterRating").text(media);
-        $("#sitterReviewsCount").text(`(${recensioni.length} ${recensioni.length === 1 ? 'recensione' : 'recensioni'})`);
+        $("#sitterRatingMedia").text(media);
+        $("#sitterReviewsTotal").text(`(${recensioni.length} ${recensioni.length === 1 ? 'recensione' : 'recensioni'})`);
 
         // Generazione lista recensioni
         recensioni.forEach(function (rec) {
@@ -172,7 +188,7 @@ $(document).ready(function () {
                 ? new Date(rec.data_creazione).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })
                 : '';
 
-            const nomeAutore = `${rec.nome || 'Cliente'} ${rec.cognome || ''}`.trim();
+            const nomeAutore = `${rec.nome_proprietario || 'Cliente'} ${rec.cognome_proprietario || ''}`.trim();
 
             $reviewsList.append(`
                 <div class="border-bottom pb-3 mb-2">

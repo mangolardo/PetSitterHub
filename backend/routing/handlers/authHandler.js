@@ -83,15 +83,16 @@ const queries = require('../../../database/queries');
             // req.user viene popolato dal middleware che verifica il token
             const userId = req.user.id
             const ruolo = req.user.ruolo
-            if (ruolo == "proprietario"){
-                let userResult = await db.query(
+            let userResult = []
+            if (ruolo === "proprietario"){
+                 userResult = await db.query(
                     queries.FIND_PROP_ID,
-                    [req.user.id]
+                    [userId]
                 );
             }else {
                 userResult = await db.query(
                     queries.FIND_PROF_ID,
-                    [req.user.id])
+                    [userId])
             }
 
             if (userResult.rows.length === 0) {

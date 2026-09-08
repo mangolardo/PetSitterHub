@@ -9,7 +9,6 @@ exports.catalog = async (req, res) => {
         const animale = req.query.animale;
         const zona = req.query.zona;
         const servizio = req.query.servizio;
-        console.log(zona)
 if(zona){
         if (animale&&servizio){
             rows = await db.query(queries.GET_CAT_PROF_AN_SERV,[zona,servizio,animale] )
@@ -49,6 +48,19 @@ exports.getSitterById = async (req, res) => {
     } catch (error) {
         console.error('Errore durante il recupero del singolo sitter:', error);
         res.status(500).json({ error: 'Errore interno del server' });
+    }
+};
+
+exports.best = async (req, res) => {
+    try {
+        const query = queries.GET_3_BEST;
+
+        const result = await db.query(query);
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Errore nel recupero dei top sitter:', error);
+        res.status(500).json({ error: 'Errore durante il recupero dei professionisti in evidenza' });
     }
 };
 

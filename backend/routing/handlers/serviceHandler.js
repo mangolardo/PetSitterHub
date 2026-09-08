@@ -87,3 +87,17 @@ exports.deleteService = async (req, res) => {
         res.status(500).json({ error: 'Errore interno durante la cancellazione del servizio' });
     }
 };
+exports.getZones = async (req, res) => {
+    try {
+        // Query per estrarre tutte le zone uniche associate ai servizi attivi
+        const query = queries.GET_ZONES;
+        const result = await db.query(query);
+
+        // Gestisce sia PostgreSQL (result.rows) che MySQL (result diretto)
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Errore nel recupero delle zone:', error);
+        res.status(500).json({ error: 'Errore durante il recupero delle zone' });
+    }
+}

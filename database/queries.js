@@ -8,6 +8,8 @@ module.exports = {
     FIND_PROF_EMAIL: 'SELECT * FROM professionista WHERE email = $1',
     FIND_PROP_ID: 'SELECT id, nome, cognome, zona, email, data_registrazione FROM proprietari WHERE id = $1',
     FIND_PROF_ID: 'SELECT id, nome, cognome, email, data_registrazione FROM professionista WHERE id = $1',
+    GET_PROF_ID: 'SELECT id, nome, cognome, data_registrazione FROM professionista WHERE id = $1',
+
     GET_CAT_PROF_SERVIZIO: `SELECT P.id, nome, zona, tipologia, tariffa , tipo_animale  FROM professionista as P join servizio on P.id = id_professionista where zona = $1 AND tipologia = $2 `,
     GET_CAT_PROF_AN_SERV: `SELECT P.id, nome, zona, tipologia, tariffa , tipo_animale  FROM professionista as P  join servizio on P.id = id_professionista where zona = $1 AND tipologia = $2 AND tipo_animale = $3`,
     GET_CAT_PROF_ANIMALE: `SELECT P.id, nome, zona, tipologia, tariffa , tipo_animale  FROM professionista as P  join servizio on P.id = id_professionista where zona = $1 AND tipo_animale = $3`,
@@ -19,7 +21,7 @@ module.exports = {
     DELETE_AVAILABILITY: ` DELETE FROM disponibilita WHERE id = $1  AND id_servizio IN (SELECT id FROM servizio WHERE id_professionista = $2)RETURNING id  `,
     ADD_SERVICE: ` INSERT INTO servizio (tipologia, tariffa, tipo_animale, zona, id_professionista)  VALUES ($1, $2, $3, $4, $5) RETURNING id, tipologia, tariffa, tipo_animale, zona`,
     DELETE_SERVICE: `DELETE FROM servizio  WHERE id = $1 AND id_professionista = $2 RETURNING id`,
-    GET_SERVICE_BY_ID: `SELECT S.id,  S.tipologia,S.tariffa, S.tipo_animale, S.zona,P.nome AS nome_professionista, P.cognome AS cognome_professionista FROM servizio S JOIN professionista P ON S.id_professionista = P.id WHERE S.id = $1 `,
+    GET_SERVICE_BY_ID: `SELECT S.id,  S.tipologia,S.tariffa, S.tipo_animale, S.zona,P.id AS id_professionista, P.nome AS nome_professionista, P.cognome AS cognome_professionista FROM servizio S JOIN professionista P ON S.id_professionista = P.id WHERE S.id = $1 `,
     LOCK_AVAILABILITY: ` UPDATE disponibilita  SET is_disponibile = FALSE  WHERE id = $1 AND is_disponibile = TRUE RETURNING id, id_servizio, data_inizio, data_fine `,
     CREATE_BOOKING: ` INSERT INTO prenotazione (id_proprietario, id_disponibilita) VALUES ($1, $2) RETURNING id, data_richiesta`,
     CREATE_PENDING_BOOKING: `INSERT INTO prenotazione (id_proprietario, id_disponibilita, stato) VALUES ($1, $2, 'in_attesa')RETURNING id, id_disponibilita, stato, data_richiesta`,
@@ -73,5 +75,31 @@ FROM pagamento PAY JOIN prenotazione P ON PAY.id_prenotazione = P.id  JOIN dispo
     GET_MESSAGES: `   SELECT id, id_mittente, tipo_mittente, testo, data_invio  FROM messaggio  WHERE id_conversazione = $1   ORDER BY data_invio `,
     INSERT_MESSAGE: ` INSERT INTO messaggio (id_conversazione, id_mittente, tipo_mittente, testo)  VALUES ($1, $2, $3, $4)  RETURNING id, id_mittente, tipo_mittente, testo, data_invio `,
     DELETE_MESSAGE: `  DELETE FROM messaggio    WHERE id = $1     AND id_mittente = $2   AND tipo_mittente = $3  RETURNING id `,
-    GET_RECENSIONI_SERVIZIO: 'SELECT  r.id,  r.valutazione, r.commento,  r.data_creazione,p.nome AS nome_proprietario, p.cognome AS cognome_proprietario, s.tipologia AS tipo_servizio  FROM recensione r  JOIN proprietari p ON r.id_proprietario = p.id JOIN servizio s ON r.id_servizio = s.id WHERE s.id= $1 ORDER BY r.data_creazione DESC  '
+    GET_RECENSIONI_SERVIZIO: 'SELECT  r.id,  r.valutazione, r.commento,  r.data_creazione,p.nome AS nome_proprietario, p.cognome AS cognome_proprietario, s.tipologia AS tipo_servizio  FROM recensione r  JOIN proprietari p ON r.id_proprietario = p.id JOIN servizio s ON r.id_servizio = s.id WHERE s.id= $1 ORDER BY r.data_creazione DESC  ',
+    GET_ZONES : 'SELECT DISTINCT zona FROM servizio WHERE zona IS NOT NULL ',
+    GET_3_BEST : `
+        WITH sitter_valutazioni AS (
+            SELECT
+                p.id AS id_professionista,
+                p.nome AS nome_professionista,
+                p.cognome AS cognome_professionista,
+                COALESCE(AVG(r.valutazione), 5.0) AS valutazione_media
+            FROM professionista p
+                     LEFT JOIN servizio s ON p.id = s.id_professionista
+                     LEFT JOIN recensione r ON s.id = r.id_servizio
+            GROUP BY p.id, p.nome, p.cognome
+            ORDER BY valutazione_media DESC
+            LIMIT 3
+        )
+        SELECT
+            sv.id_professionista,
+            sv.nome_professionista,
+            sv.cognome_professionista,
+            sv.valutazione_media,
+            STRING_AGG(DISTINCT s.tipologia, ', ') AS lista_servizi
+        FROM sitter_valutazioni sv
+                 LEFT JOIN servizio s ON sv.id_professionista = s.id_professionista
+        GROUP BY sv.id_professionista, sv.nome_professionista, sv.cognome_professionista, sv.valutazione_media
+        ORDER BY sv.valutazione_media DESC;
+    `
 };
