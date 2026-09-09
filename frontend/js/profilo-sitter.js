@@ -154,7 +154,12 @@ $(document).ready(function () {
                                 <span class="badge bg-primary-subtle text-primary fw-semibold">${escapeHtml(s.tipologia || 'Servizio')}</span>
                                 <span class="fw-bold fs-5 text-success">€${tariffa}</span>
                             </div>
-                            <h6 class="fw-bold">${escapeHtml(s.tipologia || 'Servizio')} - ${escapeHtml(s.tipo_animale || 'Pet')}</h6>
+                            <!-- Aggiunto il link che punta a dettaglio-servizio.html con l'ID specifico -->
+                            <h6 class="fw-bold">
+                                <a href="dettaglio-servizio.html?id_servizio=${serviceId}" class="text-decoration-none text-dark text-success-hover">
+                                    ${escapeHtml(s.tipologia || 'Servizio')} - ${escapeHtml(s.tipo_animale || 'Pet')}
+                                </a>
+                            </h6>
                         </div>
                         <a href="prenotazione.html?id_servizio=${serviceId}" class="btn btn-sm btn-outline-primary mt-2 w-100">
                             Prenota ora

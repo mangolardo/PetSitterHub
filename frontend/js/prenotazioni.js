@@ -13,7 +13,7 @@ prte del profilo utente e dashboard
  * Funzione per recuperare la lista delle prenotazioni dal backend e popolarne la tabella
  */
 function caricaPrenotazioni() {
-    const token = localStorage.getItem('token'); // Recupera il JWT memorizzato
+    const token = localStorage.getItem('token'); // Recupera il JWT memorizzato[cite: 17]
 
     if (!token) {
         $('#lista-prenotazioni').html(`
@@ -27,7 +27,7 @@ function caricaPrenotazioni() {
     }
 
     $.ajax({
-        url: `${API_BASE_URL}/bookings/`, // Modifica l'endpoint se la tua rotta ha un prefisso diverso
+        url: `${API_BASE_URL}/bookings/`,
         type: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -53,39 +53,38 @@ function caricaPrenotazioni() {
                 const dataInizio = p.data_inizio ? new Date(p.data_inizio).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : '-';
                 const dataFine = p.data_fine ? new Date(p.data_fine).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : '-';
 
-                // Gestione dei campi restituite dalle query (ad es. tipologia servizio, controparte, importo/tariffa)
-                                // MODIFICA: Creiamo il link cliccabile (il backend deve inviare id_servizio nella query SQL)
-                                git const idServizio = p.id_servizio;
-                                const servizio = `<a href="dettaglio-servizio.html?id_servizio=${idServizio}" class="text-decoration-underline text-dark">${escapeHtml(p.nome_servizio || 'Servizio')}</a>`;
+                // Creazione del link cliccabile al dettaglio del servizio
+                const idServizio = p.id_servizio;
+                const servizio = `<a href="dettaglio-servizio.html?id_servizio=${idServizio}" class="text-decoration-underline text-dark fw-semibold">${escapeHtml(p.nome_servizio || 'Servizio')}</a>`;
 
-                                const controparte =  escapeHtml(p.nome_professionista + ' ' + (p.cognome_professionista || '')) || '-';
-                                const importo = p.importo || p.tariffa ? `€ ${parseFloat(p.importo || p.tariffa).toFixed(2)}` : '-';
+                const controparte = escapeHtml((p.nome_professionista || '') + ' ' + (p.cognome_professionista || '')) || '-';
+                const importo = p.importo || p.tariffa ? `€ ${parseFloat(p.importo || p.tariffa).toFixed(2)}` : '-';
 
-                                // Badge opzionale per lo stato della prenotazione
-                                let statoBadge = '';
-                                if (p.stato) {
-                                    const badgeClass = {
-                                        'in_attesa': 'bg-warning text-dark',
-                                        'confermata': 'bg-success',
-                                        'rifiutata': 'bg-danger',
-                                        'completata': 'bg-info text-dark',
-                                        'annullata': 'bg-secondary'
-                                    }[p.stato] || 'bg-secondary';
+                // Badge opzionale per lo stato della prenotazione
+                let statoBadge = '';
+                if (p.stato) {
+                    const badgeClass = {
+                        'in_attesa': 'bg-warning text-dark',
+                        'confermata': 'bg-success',
+                        'rifiutata': 'bg-danger',
+                        'completata': 'bg-info text-dark',
+                        'annullata': 'bg-secondary'
+                    }[p.stato] || 'bg-secondary';
 
-                                    statoBadge = `<span class="badge ${badgeClass} ms-2">${p.stato.replace('_', ' ')}</span>`;
-                                }
+                    statoBadge = `<span class="badge ${badgeClass} ms-2">${p.stato.replace('_', ' ')}</span>`;
+                }
 
-                                const rigaHtml = `
-                                    <tr>
-                                        <td><span class="fw-semibold">${servizio}</span> ${statoBadge}</td>
-                                        <td>${dataInizio}</td>
-                                        <td>${dataFine}</td>
-                                        <td>${controparte}</td>
-                                        <td class="fw-bold">${importo}</td>
-                                    </tr>
-                                `;
+                const rigaHtml = `
+                    <tr>
+                        <td>${servizio} ${statoBadge}</td>
+                        <td>${dataInizio}</td>
+                        <td>${dataFine}</td>
+                        <td>${controparte}</td>
+                        <td class="fw-bold">${importo}</td>
+                    </tr>
+                `;
 
-                                $tbody.append(rigaHtml);
+                $tbody.append(rigaHtml);
             });
         },
         error: function (xhr) {
@@ -103,4 +102,7 @@ function caricaPrenotazioni() {
             `);
         }
     });
+}
+function escapeHtml(text) {
+    return $('<div>').text(text || '').html();
 }

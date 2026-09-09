@@ -47,13 +47,13 @@ module.exports = {
         SET is_disponibile = TRUE
         FROM prenotazioni_scadute ps
         WHERE d.id = ps.id_disponibilita`,
-   GET_PRENOTAZIONI_PROP: `SELECT  P.id AS id_prenotazione, S.id, D.data_inizio, D.data_fine,  P.stato,  P.data_richiesta,S.tipologia AS nome_servizio,PROF.nome AS nome_professionista, PROF.cognome AS cognome_professionista , PAY.importo
+   GET_PRENOTAZIONI_PROP: `SELECT  P.id AS id_prenotazione, S.id AS id_servizio, D.data_inizio, D.data_fine,  P.stato,  P.data_richiesta,S.tipologia AS nome_servizio,PROF.nome AS nome_professionista, PROF.cognome AS cognome_professionista , PAY.importo
 FROM pagamento PAY JOIN prenotazione P ON PAY.id_prenotazione = P.id  JOIN disponibilita D ON P.id_disponibilita = D.id JOIN servizio S ON D.id_servizio = S.id JOIN professionista PROF ON S.id_professionista = PROF.id WHERE P.id_proprietario = $1 ORDER BY D.data_inizio DESC`,
     GET_PRENOTAZIONI_PROF: `
-        WITH first AS (SELECT  P.id AS id_prenotazione, S.id,  D.data_inizio, D.data_fine,  P.stato,  P.data_richiesta,S.tipologia AS nome_servizio,PR.nome AS nome_proprietario, PR.cognome AS cognome_proprietario, S.id_professionista
+        WITH first AS (SELECT  P.id AS id_prenotazione, S.id AS id_servizio,  D.data_inizio, D.data_fine,  P.stato,  P.data_richiesta,S.tipologia AS nome_servizio,PR.nome AS nome_proprietario, PR.cognome AS cognome_proprietario, S.id_professionista
                        FROM proprietari PR JOIN prenotazione P ON PR.id = P.id_proprietario JOIN disponibilita D ON P.id_disponibilita = D.id JOIN servizio S ON D.id_servizio = S.id
                        ORDER BY D.data_inizio DESC)
-        SELECT  fs.id_prenotazione, fs.data_inizio, fs.data_fine, fs.stato, fs.data_richiesta,fs.nome_servizio,fs. nome_proprietario,fs.cognome_proprietario, PAY.importo
+        SELECT fs.id_servizio, fs.id_prenotazione, fs.data_inizio, fs.data_fine, fs.stato, fs.data_richiesta,fs.nome_servizio,fs. nome_proprietario,fs.cognome_proprietario, PAY.importo
         FROM first fs JOIN pagamento PAY ON fs.id_prenotazione = PAY.id_prenotazione
         WHERE fs.id_professionista = $1
        `,
