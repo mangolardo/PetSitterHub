@@ -2,7 +2,7 @@ const request = require('supertest');
 const express = require('express');
 
 // Visto che integration.test.js ora è direttamente in backend/, usciamo di un solo livello
-jest.mock('../database/config', () => ({
+jest.mock('./database/config', () => ({
     query: jest.fn(),
 }));
 

@@ -1,9 +1,8 @@
-jest.mock('../../../../database/config', () => ({ query: jest.fn() }));
+jest.mock('../../../database/config', () => ({ query: jest.fn() }));
 
-// Mock del modulo queries per evitare errori di concatenazione con stringhe undefined
-jest.mock('../../../../database/queries', () => ({
+jest.mock('../../../database/queries', () => ({
     GET_CAT: 'SELECT * FROM servizio s JOIN professionista p ON s.id_professionista = p.id WHERE 1=1',
-    GET_PROF_ID: 'SELECT * FROM professionista WHERE id = $1',
+    GET_PROF_ID: 'SELECT id, nome, cognome, email, data_registrazione FROM professionista WHERE id = $1',
     GET_3_BEST: 'SELECT * FROM professionista LIMIT 3'
 }));
 
@@ -20,7 +19,7 @@ describe('Unit Tests per sittersHandler', () => {
     });
 
     describe('Funzione: catalog', () => {
-        it('dovrebbe restituire un array di sitter filtrato e chiamare res.json()[cite: 16]', async () => {
+        it('dovrebbe restituire un array di sitter filtrato e chiamare res.json()', async () => {
             req.query = { zona: 'Milano', servizio: 'Passeggiata', animale: 'Cane' };
             const mockData = [{ id_servizio: 1, nome_professionista: 'Mario' }];
 
@@ -32,7 +31,7 @@ describe('Unit Tests per sittersHandler', () => {
             expect(res.json).toHaveBeenCalledWith(mockData);
         });
 
-        it('dovrebbe restituire 500 in caso di errore del database[cite: 16]', async () => {
+        it('dovrebbe restituire 500 in caso di errore del database', async () => {
             db.query.mockRejectedValue(new Error('DB Error'));
 
             await sittersHandler.catalog(req, res);
@@ -43,7 +42,7 @@ describe('Unit Tests per sittersHandler', () => {
     });
 
     describe('Funzione: getSitterById', () => {
-        it('dovrebbe restituire il professionista con status 200 se trovato[cite: 16]', async () => {
+        it('dovrebbe restituire il professionista con status 200 se trovato', async () => {
             req.params.id = 1;
             const mockSitter = { id: 1, nome: 'Luigi' };
 
@@ -55,7 +54,7 @@ describe('Unit Tests per sittersHandler', () => {
             expect(res.json).toHaveBeenCalledWith(mockSitter);
         });
 
-        it('dovrebbe restituire 404 se il professionista non esiste[cite: 16]', async () => {
+        it('dovrebbe restituire 404 se il professionista non esiste', async () => {
             req.params.id = 99;
 
             db.query.mockResolvedValue({ rows: [] });
@@ -65,10 +64,20 @@ describe('Unit Tests per sittersHandler', () => {
             expect(res.status).toHaveBeenCalledWith(404);
             expect(res.json).toHaveBeenCalledWith({ error: 'Professionista non trovato' });
         });
+
+        it('dovrebbe restituire 500 in caso di errore del database', async () => {
+            req.params.id = 1;
+            db.query.mockRejectedValue(new Error('DB Error'));
+
+            await sittersHandler.getSitterById(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Errore interno del server' });
+        });
     });
 
     describe('Funzione: best', () => {
-        it('dovrebbe restituire la lista dei top 3 sitter chiamando res.json()[cite: 16]', async () => {
+        it('dovrebbe restituire la lista dei top 3 sitter chiamando res.json()', async () => {
             const mockTopSitters = [{ id: 1 }, { id: 2 }, { id: 3 }];
 
             db.query.mockResolvedValue({ rows: mockTopSitters });
@@ -79,7 +88,7 @@ describe('Unit Tests per sittersHandler', () => {
             expect(res.json).toHaveBeenCalledWith(mockTopSitters);
         });
 
-        it('dovrebbe gestire gli errori e restituire 500[cite: 16]', async () => {
+        it('dovrebbe gestire gli errori e restituire 500', async () => {
             db.query.mockRejectedValue(new Error('DB Error'));
 
             await sittersHandler.best(req, res);

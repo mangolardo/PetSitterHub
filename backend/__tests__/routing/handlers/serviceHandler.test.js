@@ -1,8 +1,8 @@
 const db = require('../../../database/config');
 const serviceHandler = require('../../../routing/handlers/serviceHandler');
 
-jest.mock('../../../../database/config', () => ({ query: jest.fn() }));
-jest.mock('../../../../database/queries', () => ({
+jest.mock('../../../database/config', () => ({ query: jest.fn() }));
+jest.mock('../../../database/queries', () => ({
     GET_SERVICE_BY_ID: 'mock', GET_SERVIZI: 'mock', ADD_SERVICE: 'mock', DELETE_SERVICE: 'mock'
 }));
 

@@ -1,8 +1,9 @@
 const db = require('../../../database/config');
 const bookingsHandler = require('../../../routing/handlers/bookingsHandler');
+const queries = require('../../../database/queries')
 
 // Mock avanzato per simulare le transazioni (db.connect)
-jest.mock('../../../../database/config', () => {
+jest.mock('../../../database/config', () => {
     const mClient = {
         query: jest.fn(),
         release: jest.fn()
@@ -13,7 +14,7 @@ jest.mock('../../../../database/config', () => {
     };
 });
 
-jest.mock('../../../../database/queries', () => ({
+jest.mock('../../../database/queries', () => ({
     LOCK_AVAILABILITY: 'mock_lock',
     CREATE_PENDING_BOOKING: 'mock_create'
 }));

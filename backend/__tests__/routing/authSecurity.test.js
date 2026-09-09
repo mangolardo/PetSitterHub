@@ -3,7 +3,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 
 // Mock del database dalla root (tre livelli sopra)
-jest.mock('../../../database/config', () => ({
+jest.mock('../../database/config', () => ({
     query: jest.fn(),
 }));
 

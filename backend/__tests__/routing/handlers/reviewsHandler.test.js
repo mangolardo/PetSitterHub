@@ -1,8 +1,8 @@
 const db = require('../../../database/config');
 const reviewsHandler = require('../../../routing/handlers/reviewsHandler');
 
-jest.mock('../../../../database/config', () => ({ query: jest.fn() }));
-jest.mock('../../../../database/queries', () => ({
+jest.mock('../../../database/config', () => ({ query: jest.fn() }));
+jest.mock('../../../database/queries', () => ({
     GET_RECENSIONI_PROFESSIONISTA: 'mock',
     CHECK_PRENOTAZIONE_CONFERMATA: 'mock',
     CREATE_RECENSIONE: 'mock',

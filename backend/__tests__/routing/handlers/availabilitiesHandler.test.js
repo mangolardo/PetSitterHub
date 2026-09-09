@@ -1,8 +1,8 @@
 const db = require('../../../database/config');
 const availabilitiesHandler = require('../../../routing/handlers/availabilitiesHandler');
 
-jest.mock('../../../../database/config', () => ({ query: jest.fn() }));
-jest.mock('../../../../database/queries', () => ({
+jest.mock('../../../database/config', () => ({ query: jest.fn() }));
+jest.mock('../../../database/queries', () => ({
     GET_DISP: 'mock', CHECK_SERVICE_OWNERSHIP: 'mock', ADD_AVAILABILITY: 'mock', DELETE_AVAILABILITY: 'mock'
 }));
 

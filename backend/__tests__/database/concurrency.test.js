@@ -3,7 +3,7 @@ jest.mock('@google-cloud/cloud-sql-connector', () => ({
         getOptions: jest.fn().mockResolvedValue({}),
     })),
 }));
-jest.mock('../../../database/config', () => ({
+jest.mock('../../database/config', () => ({
     query: jest.fn(),
     connect: jest.fn()
 }));

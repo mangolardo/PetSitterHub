@@ -1,7 +1,7 @@
 const db = require('../../../database/config');
 const paymentHandler = require('../../../routing/handlers/paymentHandler');
 
-jest.mock('../../../../database/config', () => {
+jest.mock('../../../database/config', () => {
     const mClient = {
         query: jest.fn(),
         release: jest.fn()
@@ -9,7 +9,7 @@ jest.mock('../../../../database/config', () => {
     return { connect: jest.fn(() => mClient) };
 });
 
-jest.mock('../../../../database/queries', () => ({
+jest.mock('../../../database/queries', () => ({
     GET_PRENOTAZIONE_STATO: 'mock',
     CREATE_PAYMENT: 'mock',
     CONFIRM_BOOKING: 'mock'

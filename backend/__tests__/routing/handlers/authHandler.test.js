@@ -5,10 +5,10 @@ const authHandler = require('../../../routing/handlers/authHandler');
 
 jest.mock('bcrypt');
 jest.mock('jsonwebtoken');
-jest.mock('../../../../database/config', () => ({
+jest.mock('../../../database/config', () => ({
     query: jest.fn()
 }));
-jest.mock('../../../../database/queries', () => ({
+jest.mock('../../../database/queries', () => ({
     CHECK_EMAIL: 'mock_query',
     INSERT_PROP: 'mock_query',
     FIND_PROP_EMAIL: 'mock_query',
