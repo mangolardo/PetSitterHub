@@ -31,18 +31,9 @@ $(document).ready(function () {
             return;
         }
 
+
         // Decodifica il token per leggere il ruolo prima di avviare la rotta
-        let userRole = null;
-        try {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            userRole = JSON.parse(jsonPayload).ruolo;
-        } catch (e) {
-            console.error("Errore decodifica JWT");
-        }
+        let userRole = getDecodedTokenPayload(token) && getDecodedTokenPayload(token).ruolo;
 
         // Blocco preventivo lato client
         if (userRole === 'professionista') {
@@ -53,7 +44,43 @@ $(document).ready(function () {
         // Reindirizza l'utente all'area personale passando la tab da aprire e l'id del destinatario
         window.location.href = `profilo.html?tab=chat&id_destinatario=${idProfessionista}`;
     });
+    function getDecodedTokenPayload(token) {
+        try {
+            if (!token) return null;
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
 
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // Intercetta il click sul bottone "Prenota ora" e blocca i professionisti
+    $(document).on('click', '.btn-prenota', function (e) {
+        const token = localStorage.getItem('token');
+
+        // Se non loggato, reindirizza al login
+        if (!token) {
+            e.preventDefault();
+            alert("Devi accedere per poter prenotare un servizio.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        const payload = getDecodedTokenPayload(token);
+        const role = payload && payload.ruolo;
+
+        if (role === 'professionista') {
+            e.preventDefault();
+            alert("I professionisti non possono prenotare servizi. Accedi con un account 'proprietario'.");
+            return;
+        }
+        // Altrimenti lascia proseguire il click (navigazione a prenotazione.html)
+    });
     function loadAllSitterData(id) {
         $.when(
             fetchSitterDetails(id),
@@ -181,7 +208,7 @@ $(document).ready(function () {
                                 </a>
                             </h6>
                         </div>
-                        <a href="prenotazione.html?id_servizio=${serviceId}" class="btn btn-sm btn-outline-primary mt-2 w-100">
+                        <a href="prenotazione.html?id_servizio=${serviceId}" class="btn btn-sm btn-outline-primary mt-2 w-100 btn-prenota" data-service-id="${serviceId}">
                             Prenota ora
                         </a>
                     </div>
