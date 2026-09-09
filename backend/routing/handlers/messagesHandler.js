@@ -32,8 +32,7 @@ exports.initConversation = async (req, res) => {
             idProprietario = userId;
             idProfessionista = req.body.id_destinatario; // Inviato dal frontend
         } else if (userRole === 'professionista') {
-            idProfessionista = userId;
-            idProprietario = req.body.id_destinatario;
+           return res.status(403).json({error: 'Sei un professionista! Crea un account "proprietario" per contattare un altro professionista'})
         } else {
             return res.status(403).json({ error: 'Ruolo non valido' });
         }
@@ -128,3 +127,4 @@ exports.deleteMessage = async (req, res) => {
         res.status(500).json({ error: 'Errore interno durante la cancellazione del messaggio' });
     }
 };
+

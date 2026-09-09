@@ -58,7 +58,7 @@ FROM pagamento PAY JOIN prenotazione P ON PAY.id_prenotazione = P.id  JOIN dispo
         WHERE fs.id_professionista = $1
        `,
 
-GET_PRENOTAZIONE: 'SELECT P.id AS id_prenotazione,S.zona, D.data_inizio, D.data_fine, P.stato, P.data_richiesta, S.tipologia AS nome_servizio, PROF.nome AS nome_professionista, PROF.cognome AS cognome_professionista, PAY.importo, S.tariffa FROM prenotazione P JOIN disponibilita D ON P.id_disponibilita = D.id JOIN servizio S ON D.id_servizio = S.id JOIN professionista PROF ON S.id_professionista = PROF.id LEFT JOIN pagamento PAY ON PAY.id_prenotazione = P.id WHERE P.id_proprietario = $1 AND P.id = $2',
+GET_PRENOTAZIONE: 'SELECT P.id AS id_prenotazione,S.zona, S.tipo_animale, D.data_inizio, D.data_fine, P.stato, P.data_richiesta, S.tipologia AS nome_servizio, PROF.nome AS nome_professionista, PROF.cognome AS cognome_professionista, PAY.importo, S.tariffa FROM prenotazione P JOIN disponibilita D ON P.id_disponibilita = D.id JOIN servizio S ON D.id_servizio = S.id JOIN professionista PROF ON S.id_professionista = PROF.id LEFT JOIN pagamento PAY ON PAY.id_prenotazione = P.id WHERE P.id_proprietario = $1 AND P.id = $2',
 
    // GET_PRENOTAZIONE_PROP: `SELECT  P.id AS id_prenotazione,  D.data_inizio, D.data_fine,  P.stato,  P.data_richiesta,S.tipologia AS nome_servizio,PROF.nome AS nome_professionista, PROF.cognome AS cognome_professionista , PAY.importo
    //                         FROM pagamento PAY JOIN prenotazione P ON PAY.id_prenotazione = P.id  JOIN disponibilita D ON P.id_disponibilita = D.id JOIN servizio S ON D.id_servizio = S.id JOIN professionista PROF ON S.id_professionista = PROF.id WHERE P.id_proprietario = $1 AND P.id= $2`,

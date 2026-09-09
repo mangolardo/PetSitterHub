@@ -8,8 +8,10 @@ $(document).ready(function () {
     $.ajaxSetup({
         headers: { 'Authorization': 'Bearer ' + token }
     });
+const payload = getDecodedTokenPayload();
+    const currentUserId = payload.id;
+    const currentUserRole = payload.ruolo;
 
-    const currentUserId = getCurrentUserId();
     let activeConversationId = null;
 
     // Se arrivi da "Contatta Pet Sitter" con un ID nell'URL
@@ -80,8 +82,8 @@ $(document).ready(function () {
                 loadConversations();
                 loadMessages(activeConversationId);
             },
-            error: function () {
-                alert("Impossibile aprire la chat con questo utente.");
+            error: function (xhr) {
+                showChatAlert(xhr.responseJSON.error, 'danger')
                 loadConversations();
             }
         });
@@ -125,7 +127,7 @@ $(document).ready(function () {
                 }
 
                 messages.forEach(function (msg) {
-                    const isMine = msg.id_mittente === currentUserId;
+                    const isMine = msg.tipo_mittente === currentUserRole;
                     const alignment = isMine ? 'justify-content-end' : 'justify-content-start';
                     const bubbleBg = isMine ? 'bg-success text-white' : 'bg-light text-dark border';
 
@@ -215,16 +217,27 @@ $(document).ready(function () {
         return new Date(dateStr).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
     }
 
-    function getCurrentUserId() {
+    function getDecodedTokenPayload() {
         try {
             const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
             const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
-            return JSON.parse(jsonPayload).id;
+
+            return JSON.parse(jsonPayload);
         } catch (e) {
             return null;
         }
     }
+
 });
+function showChatAlert(message, type) {
+    const $alert = $('#alert-message');
+    if ($alert.length) {
+        $alert.removeClass('d-none alert-success alert-danger alert-info')
+            .addClass(`alert-${type}`)
+            .text(message);
+        setTimeout(() => $alert.addClass('d-none'), 4000);
+    }
+}

@@ -31,9 +31,29 @@ $(document).ready(function () {
             return;
         }
 
+        // Decodifica il token per leggere il ruolo prima di avviare la rotta
+        let userRole = null;
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            userRole = JSON.parse(jsonPayload).ruolo;
+        } catch (e) {
+            console.error("Errore decodifica JWT");
+        }
+
+        // Blocco preventivo lato client
+        if (userRole === 'professionista') {
+            alert("I professionisti non possono contattare altri professionisti. Accedi con un account 'proprietario'.");
+            return;
+        }
+
         // Reindirizza l'utente all'area personale passando la tab da aprire e l'id del destinatario
         window.location.href = `profilo.html?tab=chat&id_destinatario=${idProfessionista}`;
     });
+
     function loadAllSitterData(id) {
         $.when(
             fetchSitterDetails(id),

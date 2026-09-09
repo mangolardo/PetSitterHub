@@ -144,7 +144,7 @@ $(document).ready(function () {
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <div class="d-flex align-items-center gap-2">
                                         <i class="bi bi-person-circle fs-4 text-secondary"></i>
-                                        <strong class="text-dark">${escapeHtml(rev.nome_cliente || rev.autore || 'Cliente')}</strong>
+                                        <strong class="text-dark">${escapeHtml(rev.nome_proprietario + " " + rev.cognome_proprietario || 'Cliente')}</strong>
                                         <span class="ms-2">${stelleHtml}</span>
                                     </div>
                                     <small class="text-muted">${dataFormattata}</small>
@@ -231,7 +231,7 @@ $(document).ready(function () {
             //headers: { 'Authorization': `Bearer ${token}` },
             data: JSON.stringify(payload),
             success: function (response) {
-                showDashboardAlert(response.message || 'Servizio aggiunto!', 'success');
+                showDashboardAlert( 'Servizio aggiunto! Aggiungi disponibilitá nel modulo "Disponibilitá." ', 'success');
                 $('#form-nuovo-servizio')[0].reset();
 
                 const modalEl = document.getElementById('modalNuovoServizio');

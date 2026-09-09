@@ -46,7 +46,7 @@ $(document).ready(function () {
             }
 
             const nomeSitter = `${p.nome_professionista || p.nome || 'Pet'} ${p.cognome_professionista || p.cognome || 'Sitter'}`.trim();
-            const servizio = `${p.tipologia || 'Servizio'} (${p.tipo_animale || 'Pet'})`;
+            const servizio = `${p.nome_servizio || 'Servizio'} (${p.tipo_animale || 'Pet'})`;
             const zona = p.zona || 'N.D.';
 
             let dataFormattata = 'N.D.';
