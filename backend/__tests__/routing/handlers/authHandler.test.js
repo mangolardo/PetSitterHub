@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const db = require('../../../../database/config');
+const db = require('../../../database/config');
 const authHandler = require('../../../routing/handlers/authHandler');
 
 jest.mock('bcrypt');

@@ -1,4 +1,4 @@
-const queries = require('../../../database/queries');
+const queries = require('../../database/queries');
 
 describe('Unit Tests per queries.js', () => {
     it('dovrebbe esportare un oggetto valido e popolato', () => {

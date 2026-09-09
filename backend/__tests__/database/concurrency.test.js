@@ -7,7 +7,7 @@ jest.mock('../../../database/config', () => ({
     query: jest.fn(),
     connect: jest.fn()
 }));
-const db = require('../../../database/config');
+const db = require('../../database/config');
 
 describe('Database Concurrency Tests', () => {
 

@@ -1,5 +1,5 @@
-const db = require("../../../database/config");
-const queries = require("../../../database/queries");
+const db = require("../../database/config");
+const queries = require("../../database/queries");
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 

@@ -1,6 +1,6 @@
-const { Connector } = require('../backend/node_modules/@google-cloud/cloud-sql-connector');
-const { Pool } = require('../backend/node_modules/pg');
-require('../backend/node_modules/dotenv').config();
+const { Connector } = require('@google-cloud/cloud-sql-connector');
+const { Pool } = require('pg');
+require('dotenv').config();
 const connector = new Connector();
 
 async function initPool() {

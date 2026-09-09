@@ -1,4 +1,4 @@
-const db = require('../../../../database/config');
+const db = require('../../../database/config');
 const paymentHandler = require('../../../routing/handlers/paymentHandler');
 
 jest.mock('../../../../database/config', () => {

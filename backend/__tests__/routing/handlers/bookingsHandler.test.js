@@ -1,4 +1,4 @@
-const db = require('../../../../database/config');
+const db = require('../../../database/config');
 const bookingsHandler = require('../../../routing/handlers/bookingsHandler');
 
 // Mock avanzato per simulare le transazioni (db.connect)

@@ -7,7 +7,7 @@ jest.mock('../../../../database/queries', () => ({
     GET_3_BEST: 'SELECT * FROM professionista LIMIT 3'
 }));
 
-const db = require('../../../../database/config');
+const db = require('../../../database/config');
 const sittersHandler = require('../../../routing/handlers/sittersHandler');
 
 describe('Unit Tests per sittersHandler', () => {

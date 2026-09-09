@@ -10,7 +10,7 @@
     "dev": "nodemon app.js",
     "test": "jest",
     "swagger": "node ./API_docs/swagger.js",
-    "db:deploy-seed": "node ../database/seed.js"
+    "db:deploy-seed": "node database/seed.js"
   },
   "author": "",
   "license": "ISC",

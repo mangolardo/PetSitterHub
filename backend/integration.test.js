@@ -6,7 +6,7 @@ jest.mock('../database/config', () => ({
     query: jest.fn(),
 }));
 
-const db = require('../database/config');
+const db = require('./database/config');
 const authRouter = require('./routing/authRouter');
 const bookingsRouter = require('./routing/bookingsRouter');
 

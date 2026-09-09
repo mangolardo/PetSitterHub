@@ -7,7 +7,7 @@ jest.mock('../../../database/config', () => ({
     query: jest.fn(),
 }));
 
-const db = require('../../../database/config');
+const db = require('../../database/config');
 const authMiddleware = require('../../routing/authMiddleware');
 const serviceRouter = require('../../routing/serviceRouter');
 const app = express();

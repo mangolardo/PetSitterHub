@@ -1,4 +1,4 @@
-const db = require('../../../../database/config');
+const db = require('../../../database/config');
 const availabilitiesHandler = require('../../../routing/handlers/availabilitiesHandler');
 
 jest.mock('../../../../database/config', () => ({ query: jest.fn() }));
