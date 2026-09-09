@@ -76,7 +76,7 @@ GET_PRENOTAZIONE: 'SELECT P.id AS id_prenotazione,S.zona, S.tipo_animale, D.data
     UPDATE_PASSWORD_PROP: `UPDATE proprietari SET password = $1 WHERE id = $2`,
     GET_PASSWORD_PROF: `SELECT password FROM professionista WHERE id = $1`,
     UPDATE_PASSWORD_PROF: `UPDATE professionista SET password = $1 WHERE id = $2`,
-    CREATE_PAYMENT: `INSERT INTO pagamento (metodo, importo, id_prenotazione, stato)  VALUES ($1, $2, $3, $4) RETURNING *`,
+    CREATE_PAYMENT: `INSERT INTO pagamento (metodo, importo, id_prenotazione, stato)  VALUES ($1, $2, $3, $4) ON CONFLICT (id_prenotazione) DO UPDATE SET stato = EXCLUDED.stato, metodo = EXCLUDED.metodo, importo = EXCLUDED.importo RETURNING *`,
     UPDATE_PAYMENT_STATUS: `UPDATE pagamento SET stato = $1 WHERE id = $2 RETURNING *`,
     GET_RECENSIONI_PROFESSIONISTA: ` SELECT  r.id,  r.valutazione, r.commento,  r.data_creazione,p.nome AS nome_proprietario, p.cognome AS cognome_proprietario, s.tipologia AS tipo_servizio
      FROM recensione r  JOIN proprietari p ON r.id_proprietario = p.id JOIN servizio s ON r.id_servizio = s.id WHERE s.id_professionista = $1 ORDER BY r.data_creazione DESC `,
