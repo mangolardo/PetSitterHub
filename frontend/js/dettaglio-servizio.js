@@ -34,6 +34,29 @@ $(document).ready(function () {
     // Gestione invio form recensione
     setupReviewFormSubmit();
 
+    // Gestione click sul bottone di prenotazione con blocco per i professionisti
+    $(document).on('click', '#btnBookNow', function (e) {
+        const userRole = getDecodedTokenPayload(localStorage.getItem('token')).ruolo;
+        if (userRole === 'professionista') {
+            e.preventDefault();
+            alert("I professionisti non possono effettuare prenotazioni. Accedi con un account proprietario.");
+            return false;
+        }
+    });
+    function getDecodedTokenPayload(token) {
+        try {
+            if (!token) return null;
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            return null;
+        }
+    }
     /**
      * 1. CARICAMENTO DETTAGLI SERVIZIO
      */
