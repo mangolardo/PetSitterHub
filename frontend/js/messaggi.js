@@ -17,7 +17,10 @@ $(document).ready(function () {
     const idDestinatarioUrl = urlParams.get('id_destinatario');
 
     if (idDestinatarioUrl) {
+
         initiateConversation(idDestinatarioUrl);
+
+
     } else {
         loadConversations();
     }
