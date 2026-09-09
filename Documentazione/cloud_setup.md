@@ -14,7 +14,7 @@ Il processo di integrazione e rilascio continuo è automatizzato tramite GitHub 
 ### Fasi di Esecuzione della Pipeline
 * **Esecuzione dei Test**: Configurazione dell'ambiente Node.js ed esecuzione automatica delle suite di test unitari e di integrazione per validare la stabilità del codice prima di procedere al rilascio.
 * **Autenticazione GCP**: Accesso sicuro all'infrastruttura Google Cloud mediante l'utilizzo di una chiave JSON cifrata memorizzata nei GitHub Secrets (`GCP_CREDENTIALS`).
-* **Iniezione Dinamica degli Endpoint**: Interrogazione di Cloud Run per recuperare l'URL pubblico del backend e aggiornamento automatico del file di configurazione frontend (`config.js`).
+* **Iniezione Dinamica degli Endpoint**: Interrogazione di Cloud Run per recuperare l'URL pubblico del backend e aggiornamento automatico del file di configurazione frontend (`../backend/database/config.js`).
 * **Build e Push dei Container**: Compilazione delle immagini Docker per backend e frontend, successivamente caricate nel registro centralizzato **Artifact Registry** (`europe-west6-docker.pkg.dev`).
 * **Rilascio su Cloud Run**: Deploy finale dei servizi backend e frontend, con configurazione contestuale delle variabili d'ambiente necessarie alla connessione protetta.
 
