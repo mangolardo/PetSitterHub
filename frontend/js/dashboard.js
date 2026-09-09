@@ -44,31 +44,35 @@ $(document).ready(function () {
                     const dFine = new Date(prenotazione.data_fine).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
 
                     // Gestione del cliente (Proprietario)
-                    const nomeCliente = `${prenotazione.nome_proprietario || ''} ${prenotazione.cognome_proprietario || ''}`.trim() || 'Cliente N.D.';
+                                        const nomeCliente = `${prenotazione.nome_proprietario || ''} ${prenotazione.cognome_proprietario || ''}`.trim() || 'Cliente N.D.';
 
-                    // Gestione stato prenotazione per aggiungere badge colorati
-                    let badgeClass = 'bg-secondary';
-                    const stato = prenotazione.stato ? prenotazione.stato.toLowerCase() : '';
-                    if (stato === 'confermata' || stato === 'pagata') badgeClass = 'bg-success';
-                    else if (stato === 'in attesa' || stato === 'pending') badgeClass = 'bg-warning text-dark';
-                    else if (stato === 'annullata' || stato === 'cancellata') badgeClass = 'bg-danger';
+                                        // Gestione stato prenotazione per aggiungere badge colorati
+                                        let badgeClass = 'bg-secondary';
+                                        const stato = prenotazione.stato ? prenotazione.stato.toLowerCase() : '';
+                                        if (stato === 'confermata' || stato === 'pagata') badgeClass = 'bg-success';
+                                        else if (stato === 'in attesa' || stato === 'pending') badgeClass = 'bg-warning text-dark';
+                                        else if (stato === 'annullata' || stato === 'cancellata') badgeClass = 'bg-danger';
 
-                    // Gestione Importo
-                    const importo = prenotazione.importo ? `€ ${parseFloat(prenotazione.importo).toFixed(2)}` : 'In attesa di pagamento';
+                                        // Gestione Importo
+                                        const importo = prenotazione.importo ? `€ ${parseFloat(prenotazione.importo).toFixed(2)}` : 'In attesa di pagamento';
 
-                    const row = `
-                        <tr>
-                            <td>
-                                <strong>${escapeHtml(nomeCliente)}</strong><br>
-                                <span class="badge ${badgeClass} mt-1">${escapeHtml(prenotazione.stato || 'Sconosciuto')}</span>
-                            </td>
-                            <td>${escapeHtml(prenotazione.nome_servizio || 'Servizio Generico')}</td>
-                            <td>${dInizio}</td>
-                            <td>${dFine}</td>
-                            <td class="fw-bold">${escapeHtml(importo)}</td>
-                        </tr>
-                    `;
-                    $tbody.append(row);
+                                        // MODIFICA: Creiamo il link cliccabile per il servizio
+                                        const idServizio = prenotazione.id_servizio; // Assicurati che l'API restituisca questo ID
+                                        const linkServizio = `<a href="dettaglio-servizio.html?id_servizio=${idServizio}" class="text-decoration-underline text-dark">${escapeHtml(prenotazione.nome_servizio || 'Servizio Generico')}</a>`;
+
+                                        const row = `
+                                            <tr>
+                                                <td>
+                                                    <strong>${escapeHtml(nomeCliente)}</strong><br>
+                                                    <span class="badge ${badgeClass} mt-1">${escapeHtml(prenotazione.stato || 'Sconosciuto')}</span>
+                                                </td>
+                                                <td>${linkServizio}</td>
+                                                <td>${dInizio}</td>
+                                                <td>${dFine}</td>
+                                                <td class="fw-bold">${escapeHtml(importo)}</td>
+                                            </tr>
+                                        `;
+                                        $tbody.append(row);
                 });
             },
             error: function (xhr) {

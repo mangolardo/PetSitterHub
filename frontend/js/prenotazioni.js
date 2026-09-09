@@ -54,35 +54,38 @@ function caricaPrenotazioni() {
                 const dataFine = p.data_fine ? new Date(p.data_fine).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : '-';
 
                 // Gestione dei campi restituite dalle query (ad es. tipologia servizio, controparte, importo/tariffa)
-                const servizio =  p.nome_servizio || 'Servizio';
-                const controparte =  p.nome_professionista + ' ' + p.cognome_professionista || '-';
-                const importo = p.importo || p.tariffa ? `€ ${parseFloat(p.importo || p.tariffa).toFixed(2)}` : '-';
+                                // MODIFICA: Creiamo il link cliccabile (il backend deve inviare id_servizio nella query SQL)
+                                git const idServizio = p.id_servizio;
+                                const servizio = `<a href="dettaglio-servizio.html?id_servizio=${idServizio}" class="text-decoration-underline text-dark">${escapeHtml(p.nome_servizio || 'Servizio')}</a>`;
 
-                // Badge opzionale per lo stato della prenotazione
-                let statoBadge = '';
-                if (p.stato) {
-                    const badgeClass = {
-                        'in_attesa': 'bg-warning text-dark',
-                        'confermata': 'bg-success',
-                        'rifiutata': 'bg-danger',
-                        'completata': 'bg-info text-dark',
-                        'annullata': 'bg-secondary'
-                    }[p.stato] || 'bg-secondary';
+                                const controparte =  escapeHtml(p.nome_professionista + ' ' + (p.cognome_professionista || '')) || '-';
+                                const importo = p.importo || p.tariffa ? `€ ${parseFloat(p.importo || p.tariffa).toFixed(2)}` : '-';
 
-                    statoBadge = `<span class="badge ${badgeClass} ms-2">${p.stato.replace('_', ' ')}</span>`;
-                }
+                                // Badge opzionale per lo stato della prenotazione
+                                let statoBadge = '';
+                                if (p.stato) {
+                                    const badgeClass = {
+                                        'in_attesa': 'bg-warning text-dark',
+                                        'confermata': 'bg-success',
+                                        'rifiutata': 'bg-danger',
+                                        'completata': 'bg-info text-dark',
+                                        'annullata': 'bg-secondary'
+                                    }[p.stato] || 'bg-secondary';
 
-                const rigaHtml = `
-                    <tr>
-                        <td><span class="fw-semibold">${servizio}</span> ${statoBadge}</td>
-                        <td>${dataInizio}</td>
-                        <td>${dataFine}</td>
-                        <td>${controparte}</td>
-                        <td class="fw-bold">${importo}</td>
-                    </tr>
-                `;
+                                    statoBadge = `<span class="badge ${badgeClass} ms-2">${p.stato.replace('_', ' ')}</span>`;
+                                }
 
-                $tbody.append(rigaHtml);
+                                const rigaHtml = `
+                                    <tr>
+                                        <td><span class="fw-semibold">${servizio}</span> ${statoBadge}</td>
+                                        <td>${dataInizio}</td>
+                                        <td>${dataFine}</td>
+                                        <td>${controparte}</td>
+                                        <td class="fw-bold">${importo}</td>
+                                    </tr>
+                                `;
+
+                                $tbody.append(rigaHtml);
             });
         },
         error: function (xhr) {
