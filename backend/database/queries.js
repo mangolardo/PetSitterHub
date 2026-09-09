@@ -100,11 +100,12 @@ GET_PRENOTAZIONE: 'SELECT P.id AS id_prenotazione,S.zona, S.tipo_animale, D.data
                 p.id AS id_professionista,
                 p.nome AS nome_professionista,
                 p.cognome AS cognome_professionista,
-               AVG(r.valutazione) AS valutazione_media
+                AVG(r.valutazione) AS valutazione_media
             FROM professionista p
                      LEFT JOIN servizio s ON p.id = s.id_professionista
                      LEFT JOIN recensione r ON s.id = r.id_servizio
             GROUP BY p.id, p.nome, p.cognome
+            HAVING AVG(r.valutazione) IS NOT NULL
             ORDER BY valutazione_media DESC
             LIMIT 3
         )

@@ -59,7 +59,7 @@ const payload = getDecodedTokenPayload();
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <strong class="text-dark mb-0">${escapeHtml(nomeInterlocutore)}</strong>
                             </div>
-                            <p class="text-secondary small text-truncate mb-0">${escapeHtml(ultimoMessaggio)}</p>
+                            <p class="text-secondary small text-truncate mb-0">${escapeHtml(formatTime(ultimoMessaggio))}</p>
                         </a>
                     `);
                 });
@@ -214,7 +214,25 @@ const payload = getDecodedTokenPayload();
 
     function formatTime(dateStr) {
         if (!dateStr) return '';
-        return new Date(dateStr).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '';
+
+        const now = new Date();
+        const today = now.toDateString();
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+
+        const time = d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
+        if (d.toDateString() === today) {
+            return `Oggi ${time}`;
+        }
+        if (d.toDateString() === yesterday.toDateString()) {
+            return `Ieri ${time}`;
+        }
+
+        const datePart = d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        return `${datePart} ${time}`;
     }
 
     function getDecodedTokenPayload() {

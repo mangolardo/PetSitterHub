@@ -210,6 +210,9 @@ $(document).ready(function () {
                 showAlert(response.message || 'Registrazione completata!', 'success');
                 $('#registerForm')[0].reset();
                 $('#zonaGroup').addClass('d-none');
+                setTimeout(function () {
+                    window.location.href = 'login.html';
+                }, 1500);
             },
             error: function (xhr) {
                 const errorMsg = xhr.responseJSON?.error || 'Errore durante la registrazione';
