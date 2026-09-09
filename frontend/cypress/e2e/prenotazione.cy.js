@@ -22,9 +22,9 @@ describe('Lista Prenotazioni Proprietario', () => {
           id: 1,
           data_inizio: '2026-10-15T10:00:00.000Z',
           data_fine: '2026-10-15T11:30:00.000Z',
-          tipologia: 'Passeggiata',
-          nome_controparte: 'Giulia',
-          cognome_controparte: 'Rossi',
+          nome_servizio: 'Passeggiata',
+          nome_professionista: 'Giulia',
+          cognome_professionista: 'Rossi',
           importo: 15.00,
           stato: 'confermata'
         }
@@ -41,14 +41,11 @@ describe('Lista Prenotazioni Proprietario', () => {
     });
 
     cy.wait('@getProfilo');
-    cy.wait('@getMessages');
     cy.wait('@getBookings');
 
     cy.get('#tab-prenotazioni-btn').click();
 
-    cy.wait('@getBookings');
-
-    cy.get('#lista-prenotazioni').should('contain', 'Giulia')
+    cy.get('#lista-prenotazioni').should('contain', 'Giulia');
     cy.get('#lista-prenotazioni').should('contain', 'Passeggiata');
   });
 });

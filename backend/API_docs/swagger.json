@@ -237,11 +237,6 @@
         "description": "",
         "parameters": [
           {
-            "name": "animale",
-            "in": "query",
-            "type": "string"
-          },
-          {
             "name": "zona",
             "in": "query",
             "type": "string"
@@ -250,17 +245,29 @@
             "name": "servizio",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "animale",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/sitters/best": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error"
@@ -285,6 +292,19 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/services/zones": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error"

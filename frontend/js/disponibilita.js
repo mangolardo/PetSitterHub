@@ -223,7 +223,14 @@ async function handleEliminaDaModale() {
 function openCreateModal(startIso, endIso) {
     const formatForInput = (isoStr) => {
         if (!isoStr) return '';
-        const d = new Date(isoStr);
+        let d;
+        if (isoStr.length === 10 && !isoStr.includes('T')) {
+            const [year, month, day] = isoStr.split('-').map(Number);
+            d = new Date(year, month - 1, day, 0, 0, 0);
+        } else {
+            d = new Date(isoStr);
+        }
+
         const pad = (num) => String(num).padStart(2, '0');
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
@@ -271,7 +278,10 @@ async function handleAddAvailability(e) {
 
     // Impostiamo l'orario del limite a fine giornata per includere correttamente l'ultimo giorno
     limiteData.setHours(23, 59, 59);
-
+    const formatLocalDateTime = (dateObj) => {
+        const pad = (num) => String(num).padStart(2, '0');
+        return `${dateObj.getFullYear()}-${pad(dateObj.getMonth() + 1)}-${pad(dateObj.getDate())}T${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}:${pad(dateObj.getSeconds())}`;
+    };
     // Ciclo: crea una richiesta per la data attuale, poi aggiunge 7 giorni
     while (startCorrente <= limiteData) {
 
@@ -282,8 +292,8 @@ async function handleAddAvailability(e) {
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-                data_inizio: startCorrente.toISOString(),
-                data_fine: endCorrente.toISOString()
+                data_inizio: formatLocalDateTime(startCorrente),
+                data_fine: formatLocalDateTime(endCorrente)
             })
         });
 

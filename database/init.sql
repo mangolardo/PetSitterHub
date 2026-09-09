@@ -1,14 +1,3 @@
--- Pulizia per riesecuzione script
-DROP TABLE IF EXISTS messaggio CASCADE;
-DROP TABLE IF EXISTS conversazione CASCADE;
-DROP TABLE IF EXISTS pagamento CASCADE;
-DROP TABLE IF EXISTS recensione CASCADE;
-DROP TABLE IF EXISTS prenotazione CASCADE;
-DROP TABLE IF EXISTS disponibilita CASCADE;
-DROP TABLE IF EXISTS servizio CASCADE;
-DROP TABLE IF EXISTS professionista CASCADE;
-DROP TABLE IF EXISTS proprietari CASCADE;
-
 -- 1. Tabella Proprietari
 CREATE TABLE proprietari (
                              id SERIAL PRIMARY KEY,
@@ -98,3 +87,45 @@ CREATE TABLE messaggio (
                            testo TEXT NOT NULL,
                            data_invio TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 1. Proprietari
+INSERT INTO proprietari ( nome, cognome, zona, email, password) VALUES
+                                                                       ( 'Mario', 'Rossi', 'Milano', 'mario.rossi@email.it', '$2b$10$fakehashedpassword1'),
+                                                                       ( 'Luca', 'Verdi', 'Roma', 'luca.verdi@email.it', '$2b$10$fakehashedpassword2');
+
+-- 2. Professionista
+INSERT INTO professionista ( nome, cognome, email, password) VALUES
+                                                                    ( 'Giulia', 'Bianchi', 'giulia.bianchi@email.it', '$2b$10$fakehashedpassword3'),
+                                                                    ( 'Marco', 'Neri', 'marco.neri@email.it', '$2b$10$fakehashedpassword4');
+
+-- 3. Servizio
+INSERT INTO servizio (tipologia, tariffa, tipo_animale, zona, id_professionista) VALUES
+                                                                                         ( 'Passeggiata', 15.00, 'Cane', 'Roma', 1),
+                                                                                         ( 'Pensione', 25.00, 'Gatto', 'Milano', 2);
+
+-- 4. Disponibilita
+INSERT INTO disponibilita ( data_inizio, data_fine, is_disponibile, id_servizio) VALUES
+                                                                                        ('2026-10-15 10:00:00', '2026-10-15 11:30:00', TRUE, 1),
+                                                                                        ( '2026-10-16 09:00:00', '2026-10-16 18:00:00', TRUE, 2);
+
+-- 5. Prenotazione
+INSERT INTO prenotazione ( id_proprietario, id_disponibilita, stato) VALUES
+    ( 1, 1, 'confermata');
+
+-- 6. Recensione
+INSERT INTO recensione (valutazione, commento, id_servizio, id_proprietario) VALUES
+    ( 5, 'Servizio fantastico! Yuki si è divertita tantissimo.', 1, 1);
+
+-- 7. Pagamento
+INSERT INTO pagamento ( metodo, importo, id_prenotazione, stato) VALUES
+    ( 'Carta di Credito', 15.00, 1, 'completato');
+
+-- 8. Conversazione
+INSERT INTO conversazione ( id_proprietario, id_professionista) VALUES
+    (1, 1);
+
+-- 9. Messaggio
+INSERT INTO messaggio ( id_conversazione, id_mittente, tipo_mittente, testo) VALUES
+
+                                                                               ( 1, 1, 'proprietario', 'Salve, vorrei informazioni per il cane.'),
+                                                                                    ( 1, 1, 'professionista', 'Buongiorno Mario, dimmi pure!');

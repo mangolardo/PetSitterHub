@@ -170,7 +170,7 @@ $(document).ready(function () {
                 ? new Date(rec.data_creazione).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })
                 : '';
 
-            const nomeAutore = `${rec.nome || 'Cliente'} ${rec.cognome || ''}`.trim();
+            const nomeAutore = `${rec.nome_proprietario || 'Cliente'} ${rec.cognome_proprietario || ''}`.trim();
 
             let deleteBtnHTML = '';
             if (currentUserId && (rec.id_proprietario == currentUserId || rec.id_utente == currentUserId)) {

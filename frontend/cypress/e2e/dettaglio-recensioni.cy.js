@@ -5,21 +5,23 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 describe('Flusso Dettaglio e Recensioni', () => {
   it('dovrebbe permettere di scrivere e inviare una recensione', () => {
 
-    // 1. Mock per i dettagli del servizio (con id_professionista per far caricare le recensioni)
+    // 1. Mock per i dettagli del servizio (con l'aggiunta di id_servizio e tipo_animale per allinearsi al frontend)
     cy.intercept('GET', '**/api/services/service/*', {
       statusCode: 200,
       body: {
-        id: 101,
+        id_servizio: 101,
         id_professionista: 1,
         nome: 'Marco',
         cognome: 'Bianchi',
         tipologia: 'Passeggiata',
+        tipo_animale: 'Cane',
         tariffa: '15.00',
         zona: 'Milano Centro'
       }
     }).as('getServiceDetails');
 
-    cy.intercept('GET', '**/api/reviews/*', {
+    // 2. Corretto l'endpoint per intercettare le recensioni associate allo specifico servizio
+    cy.intercept('GET', '**/api/reviews/service/*', {
       statusCode: 200,
       body: []
     }).as('getReviews');

@@ -100,7 +100,7 @@ GET_PRENOTAZIONE: 'SELECT P.id AS id_prenotazione,S.zona, D.data_inizio, D.data_
                 p.id AS id_professionista,
                 p.nome AS nome_professionista,
                 p.cognome AS cognome_professionista,
-                COALESCE(AVG(r.valutazione), 5.0) AS valutazione_media
+               AVG(r.valutazione) AS valutazione_media
             FROM professionista p
                      LEFT JOIN servizio s ON p.id = s.id_professionista
                      LEFT JOIN recensione r ON s.id = r.id_servizio

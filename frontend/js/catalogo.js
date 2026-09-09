@@ -74,9 +74,9 @@ $(document).ready(function () {
 
     function getServiceIcon(tipologia) {
         const tipo = (tipologia || '').trim();
-        if (tipo.includes('Passeggiata')) return 'bi-heart-fill';
+        if (tipo.includes('Passeggiata')) return 'bi-person-walking';
         if (tipo.includes('Pet Sitting')) return 'bi-house-heart';
-        if (tipo.includes('Pensione')) return 'bi-building-heart';
+        if (tipo.includes('Pensione')) return 'bi-building-fill';
         if (tipo.includes('Toelettatura')) return 'bi-scissors';
         if (tipo.includes('Addestramento')) return 'bi-award-fill';
         return 'bi-shield-check'; // Icona di default

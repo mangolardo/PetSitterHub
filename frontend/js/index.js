@@ -45,7 +45,8 @@ $(document).ready(function () {
                     const idProfessionista = item.id_professionista;
                     const nome = item.nome_professionista || 'Pet Sitter';
                     const cognome = item.cognome_professionista || '';
-                    const valutazione = parseFloat(item.valutazione_media || 5.0).toFixed(1);
+                    let valutazione = parseFloat(item.valutazione_media).toFixed(1) ;
+                    if (valutazione === "NaN") { valutazione =  "-"}
                     const listaServizi = item.lista_servizi || 'Vari servizi disponibili';
 
                     $grid.append(`
@@ -64,7 +65,7 @@ $(document).ready(function () {
                                             <h3 class="h5 mb-1">${escapeHtml(nome)} ${escapeHtml(cognome)}</h3>
                                         </div>
                                         <span class="rating badge bg-light text-dark border">
-                                            <i class="bi bi-star-fill text-warning"></i> ${escapeHtml(valutazione)}
+                                            <i class="bi bi-star-fill text-warning"></i> ${escapeHtml(valutazione)} 
                                         </span>
                                     </div>
                                     <p class="services text-secondary mt-3">
