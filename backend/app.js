@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const express = require('express');
 const cors = require('cors');
-const db = require("../database/config");
+const db = require("#database/config");
 const queries = require("../database/queries");
 require('dotenv').config(); // Carica le variabili d'ambiente (es. connessione al database)
 const {join} = require("node:path");

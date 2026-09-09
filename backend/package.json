@@ -1,5 +1,8 @@
 {
   "name": "backend",
+    "imports": {
+      "#database/*": "../database/*"
+    },
   "version": "1.0.0",
   "main": "app.js",
   "directories": {
