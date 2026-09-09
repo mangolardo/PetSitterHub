@@ -12,7 +12,7 @@ on:
 # Variabili d'ambiente da personalizzare con i dati del tuo progetto GCP
 env:
   PROJECT_ID: 'petsitterhub'
-  REGION: 'europe-west6' # Inserisci la region che preferisci
+  REGION: 'europe-west6'
   GAR_LOCATION: 'europe-west6-docker.pkg.dev/petsitterhub/petsitterhub-repo'
 
 jobs:
@@ -29,11 +29,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
       - name: Esecuzione Test Unitari e di Integrazione
         run: |
           cd backend
           npm install
-          npm test # Se questo test fallisce, il deploy si blocca in automatico
+          npm test 
 
       # Autenticazione sicura verso Google Cloud tramite i Secrets di GitHub
       - name: Autenticazione GCP
@@ -44,17 +45,9 @@ jobs:
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Recupera l'URL del Backend dinamico
-        id: get-url
-        run: |
-         BACKEND_URL=$(gcloud run services describe petsitter-backend --region ${{ env.REGION }} --format 'value(status.url)')
-         echo "BACKEND_URL=$BACKEND_URL" >> $GITHUB_ENV
-      - name: Inietta l'URL nel codice Frontend
-        run: |
-         sed -i "s|__BACKEND_URL__|${{ env.BACKEND_URL }}|g" ./frontend/js/config.js
-
+      # CORRETTO: Allineato alla region europe-west6
       - name: Configurazione Docker per Artifact Registry
-        run: gcloud auth configure-docker europe-west1-docker.pkg.dev
+        run: gcloud auth configure-docker europe-west6-docker.pkg.dev
 
       # Utilizzo del Dockerfile del Backend
       - name: Build e Push Immagine Docker (Backend)
@@ -70,11 +63,12 @@ jobs:
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
             --set-env-vars DB_USER=${{ secrets.DB_USER }},DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_NAME=${{ secrets.DB_NAME }},INSTANCE_CONNECTION_NAME=${{ secrets.INSTANCE_CONNECTION_NAME }}
+
   # JOB 2: Build e Deploy del FRONTEND (inizia dopo il backend)
   deploy-frontend:
     name: Build e Deploy Frontend
     runs-on: ubuntu-latest
-    needs: deploy-backend # Assicura che l'API sia online prima del sito web
+    needs: deploy-backend
     steps:
       - name: Checkout del codice sorgente
         uses: actions/checkout@v4
@@ -87,8 +81,20 @@ jobs:
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      # CORRETTO: Allineato alla region europe-west6
       - name: Configurazione Docker per Artifact Registry
-        run: gcloud auth configure-docker europe-west1-docker.pkg.dev
+        run: gcloud auth configure-docker europe-west6-docker.pkg.dev
+
+      # CORRETTO: Recupero e iniezione URL spostati nel Job del Frontend
+      - name: Recupera l'URL del Backend dinamico
+        id: get-url
+        run: |
+          BACKEND_URL=$(gcloud run services describe petsitter-backend --region ${{ env.REGION }} --format 'value(status.url)')
+          echo "BACKEND_URL=$BACKEND_URL" >> $GITHUB_ENV
+
+      - name: Inietta l'URL nel codice Frontend
+        run: |
+          sed -i "s|__BACKEND_URL__|${{ env.BACKEND_URL }}|g" ./frontend/js/config.js
 
       # Utilizzo del Dockerfile del Frontend
       - name: Build e Push Immagine Docker (Frontend)
