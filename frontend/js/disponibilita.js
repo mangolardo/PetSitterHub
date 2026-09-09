@@ -265,7 +265,9 @@ async function handleAddAvailability(e) {
 
     let startCorrente = new Date(dataInizio);
     let endCorrente = new Date(dataFine);
-    let limiteData = isRicorsivo && dataFineRipetizione ? new Date(dataFineRipetizione) : startCorrente;
+
+    //Aggiunto 'new Date(startCorrente)' per clonare la data ed evitare collegamenti in memoria
+    let limiteData = isRicorsivo && dataFineRipetizione ? new Date(dataFineRipetizione) : new Date(startCorrente);
 
     // Impostiamo l'orario del limite a fine giornata per includere correttamente l'ultimo giorno
     limiteData.setHours(23, 59, 59);
