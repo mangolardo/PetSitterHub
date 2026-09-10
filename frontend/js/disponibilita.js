@@ -253,6 +253,15 @@ async function handleAddAvailability(e) {
     const dataInizio = $('#disp-inizio-input').val();
     const dataFine = $('#disp-fine-input').val();
 
+    const [annoInizio, meseInizio, giornoInizio] = dataInizio.split('T')[0].split('-').map(Number);
+    const [oraInizio, minutoInizio] = dataInizio.split('T')[1].split(':').map(Number);
+
+    const [annoFine, meseFine, giornoFine] = dataFine.split('T')[0].split('-').map(Number);
+    const [oraFine, minutoFine] = dataFine.split('T')[1].split(':').map(Number);
+
+    let startCorrente = new Date(annoInizio, meseInizio - 1, giornoInizio, oraInizio, minutoInizio, 0);
+    let endCorrente = new Date(annoFine, meseFine - 1, giornoFine, oraFine, minutoFine, 0);
+
     // Nuovi campi per la ripetizione
     const isRicorsivo = $('#disp-ripeti-checkbox').is(':checked');
     const dataFineRipetizione = $('#disp-fine-ripetizione-input').val();
@@ -262,7 +271,7 @@ async function handleAddAvailability(e) {
         return;
     }
 
-    if (new Date(dataInizio) >= new Date(dataFine)) {
+    if (startCorrente >= endCorrente) {
         alert('La data di fine deve essere successiva alla data di inizio.');
         return;
     }
@@ -270,14 +279,9 @@ async function handleAddAvailability(e) {
     const token = localStorage.getItem('token');
     const richiesteFetch = [];
 
-    let startCorrente = new Date(dataInizio);
-    let endCorrente = new Date(dataFine);
+    let limiteData = isRicorsivo && dataFineRipetizione ? new Date(dataFineRipetizione + 'T23:59:59') : new Date(startCorrente);
 
-    //Aggiunto 'new Date(startCorrente)' per clonare la data ed evitare collegamenti in memoria
-    let limiteData = isRicorsivo && dataFineRipetizione ? new Date(dataFineRipetizione) : new Date(startCorrente);
-
-    // Impostiamo l'orario del limite a fine giornata per includere correttamente l'ultimo giorno
-    limiteData.setHours(23, 59, 59);
+    // Funzione locale per formattare la data preservando l'orario esatto immesso senza shift di fuso orario
     const formatLocalDateTime = (dateObj) => {
         const pad = (num) => String(num).padStart(2, '0');
         return `${dateObj.getFullYear()}-${pad(dateObj.getMonth() + 1)}-${pad(dateObj.getDate())}T${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}:${pad(dateObj.getSeconds())}`;
